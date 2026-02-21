@@ -1,106 +1,180 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Max | Naim's Empire</title>
+    <title>SHOP H | Smart Hybrid Dynamic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        :root { --primary:#2ea043; --bg:#0b1118; --card:#1c2128; --text:#ffffff; }
+        .light-theme { --bg:#f5f6f7; --card:#ffffff; --text:#1c1e21; }
         
-        /* টাইপিং অ্যানিমেশন স্টাইল */
-        .typing-text {
-            display: inline-block;
-            overflow: hidden;
-            border-right: .15em solid #3b82f6;
-            white-space: nowrap;
-            margin: 0 auto;
-            letter-spacing: .10em;
-            animation: typing 4s steps(40, end), blink-caret .75s step-end infinite;
-        }
+        * { box-sizing:border-box; margin:0; padding:0; font-family:'Poppins',sans-serif; transition:0.3s; }
+        body { background:var(--bg); color:var(--text); overflow-x:hidden; }
 
-        @keyframes typing { from { width: 0 } to { width: 100% } }
-        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: #3b82f6; } }
+        /* Header */ 
+        header { position:sticky; top:0; z-index:1000; display:flex; justify-content:space-between; align-items:center; padding:15px; background:var(--bg); border-bottom:2px solid var(--primary); } 
+        .logo { font-size:24px; font-weight:800; color:var(--primary); letter-spacing:1px; } 
+        .profile { cursor:pointer; display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:var(--primary); border:1px solid var(--primary); padding:5px 12px; border-radius:20px; }
 
-        body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; text-align: center; padding: 0; margin: 0; }
-        .header { padding: 40px 20px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 0 0 30px 30px; animation: fadeIn 1s ease-out; }
-        .profile-img { width: 120px; height: 120px; border-radius: 50%; border: 4px solid white; object-fit: cover; background-color: #1e293b; }
-        
-        .card { background-color: #1e293b; border: 1px solid #334155; padding: 20px; border-radius: 20px; margin: 20px auto; max-width: 90%; animation: fadeIn 1.5s ease-out; }
-        .btn { background: linear-gradient(to right, #3b82f6, #2563eb); color: white; border: none; padding: 12px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; margin-top: 10px; text-decoration: none; display: inline-block; transition: 0.3s; }
-        .btn:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4); }
-        
-        /* ডিজিটাল ঘড়ি স্টাইল */
-        #clock { font-size: 1.5rem; font-weight: bold; color: #60a5fa; margin-top: 10px; font-family: monospace; }
-        
-        .product-container { display: flex; justify-content: space-around; gap: 10px; margin-top: 15px; }
-        .product-box { background: #0f172a; padding: 10px; border-radius: 15px; width: 45%; border: 1px solid #3b82f6; }
-        .product-img { width: 100%; border-radius: 10px; height: 100px; object-fit: cover; }
+        /* Category Filter */ 
+        .cat-container { display:flex; overflow-x:auto; gap:10px; padding:12px; background:var(--card); margin:10px; border-radius:15px; border:1px solid #30363d; scrollbar-width:none; } 
+        .cat-btn { padding:10px 18px; background:#0b1118; border-radius:10px; white-space:nowrap; cursor:pointer; border:1px solid var(--primary); font-size:13px; font-weight:bold; color:white; } 
+        .cat-btn.active { background:var(--primary); color:white; }
+
+        /* Search */ 
+        .search-wrap { padding:0 15px; margin:10px 0; } 
+        .search-input { width:100%; padding:14px 20px; border-radius:30px; border:2px solid var(--primary); background:var(--card); color:var(--text); font-size:15px; outline:none; }
+
+        /* Hero Slider */ 
+        #hero-slider { margin:15px; height:200px; border-radius:20px; overflow:hidden; position:relative; border:1px solid var(--primary); display: flex; align-items: center; justify-content: center; text-align: center; background: linear-gradient(135deg, #1c2128, #2ea043); } 
+
+        /* Product Grid */ 
+        .grid { display:grid; grid-template-columns:1fr 1fr; gap:15px; padding:15px; } 
+        .card { background:var(--card); border-radius:20px; padding:15px; text-align:center; border:1px solid #30363d; animation:fadeIn 0.5s; } 
+        @keyframes fadeIn { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} } 
+        .card img { width:100%; height:140px; border-radius:12px; cursor:pointer; object-fit:cover; border:1px solid #30363d; }
+
+        /* Zoom Modal */ 
+        #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:5000; justify-content:center; align-items:center; flex-direction:column; } 
+        #modal img { max-width:95%; max-height:70%; border-radius:15px; border:2px solid var(--primary); } 
+
+        /* Settings Panel */ 
+        #settings-ui { display:none; position:fixed; bottom:0; width:100%; background:var(--card); padding:30px; border-radius:30px 30px 0 0; border-top:4px solid var(--primary); z-index:4000; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); } 
+        .set-row { margin-bottom:20px; } 
+        .set-label { font-weight:bold; color:var(--primary); margin-bottom:10px; display:block; } 
+        .set-flex { display:flex; gap:10px; } 
+        .opt-btn { flex:1; padding:15px; border-radius:12px; border:none; font-weight:bold; cursor:pointer; background:#0b1118; color:white; }
+        .opt-btn.active { background: var(--primary); }
+
+        /* Buttons & Footer */
+        .wa-btn { background:#25d366; color:white; padding:10px; border-radius:10px; text-decoration:none; display:block; margin-top:10px; font-weight:bold; font-size:12px; }
+        footer { padding:30px 20px; text-align:center; background:var(--card); border-top:1px solid var(--primary); margin-top:20px; }
     </style>
 </head>
-<body onload="startTime()">
+<body class="dark-theme">
 
-    <div class="header">
-        <img src="https://i.ibb.co/RThnDBPL/havet-logo.png" alt="HAVET Logo" class="profile-img">
-        <h1 style="margin-top: 10px; font-size: 1.8rem;">THE MAX</h1>
-        <p class="typing-text" style="font-size: 0.9rem;">"ভবিষ্যৎ তাদেরই যারা আজ প্রস্তুতি নেয়"</p>
-        <div id="clock"></div>
+    <header>
+        <div class="logo">SHOP H</div>
+        <div class="profile" onclick="adminLogin()" id="p-label">👤 Sign in</div>
+    </header>
+
+    <div class="cat-container">
+        <div class="cat-btn active" onclick="filterData('all', this)" id="all-btn">সব পণ্য</div>
+        <div class="cat-btn" onclick="filterData('watch', this)">ঘড়ি (Watch)</div>
+        <div class="cat-btn" onclick="filterData('headphone', this)">হেডফোন</div>
     </div>
 
-    <div class="card">
-        <h2 style="color: #60a5fa; margin-bottom: 5px;">SHOP H</h2>
-        <p style="font-size: 0.9rem;">নাঈম বন্ধু, স্বাগতম তোমার সাম্রাজ্যে!</p>
-        <button class="btn" onclick="alert('স্বাগতম নাঈম! আমাদের অগ্রযাত্রা অব্যাহত থাকুক।')">শুরু করুন</button>
+    <div class="search-wrap">
+        <input type="text" class="search-input" id="mainSearch" placeholder="পণ্য খুঁজুন..." onkeyup="smartSearch()">
     </div>
 
-    <div class="card">
-        <h3 style="color: #60a5fa; margin-bottom: 15px;">আমাদের বিশেষ পণ্য</h3>
-        <div class="product-container">
-            <div class="product-box">
-                <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200" alt="Watch" class="product-img">
-                <p style="font-size: 0.8rem; margin: 8px 0;">Smart Watch</p>
-                <p style="color: #3b82f6; font-weight: bold; margin: 0;">৳ ১,২০০</p>
-                <a href="https://wa.me/8801788350024?text=আমি এই স্মার্ট ওয়াচটি কিনতে চাই" class="btn" style="padding: 8px 15px; font-size: 0.7rem;">অর্ডার করুন</a>
-            </div>
-            <div class="product-box">
-                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200" alt="Headphone" class="product-img">
-                <p style="font-size: 0.8rem; margin: 8px 0;">Headphone</p>
-                <p style="color: #3b82f6; font-weight: bold; margin: 0;">৳ ৮৫০</p>
-                <a href="https://wa.me/8801788350024?text=আমি এই হেডফোনটি কিনতে চাই" class="btn" style="padding: 8px 15px; font-size: 0.7rem;">অর্ডার করুন</a>
-            </div>
+    <div id="hero-slider">
+        <div style="color:white; padding:20px;">
+            <h2 id="slide-t">GORGEOUS PRODUCT 1</h2>
+            <p id="slide-s">আমাদের সেরা কালেকশন দেখুন</p>
         </div>
     </div>
 
-    <div class="card" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
-        <h3 style="color: #60a5fa;">যোগাযোগ করুন</h3>
-        <p style="font-size: 0.9rem; margin: 10px 0;">যেকোনো প্রয়োজনে ইমেইল করুন:</p>
-        <a href="mailto:naim@example.com" class="btn" style="background: #1e293b; border: 1px solid #3b82f6; padding: 10px 20px;">Email Us</a>
-        <p style="font-size: 0.8rem; margin-top: 15px; color: #94a3b8;">লোকেশন: বাংলাদেশ</p>
+    <div class="grid" id="product-list">
+        <div class="card" data-cat="watch" data-name="premium smart watch">
+            <img src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500" onclick="openZoom(this.src, 'Premium Watch')">
+            <h4 class="p-title">Premium Watch</h4>
+            <p style="color:var(--primary); font-weight:bold;">৳ ১,৫০০</p>
+            <a href="https://wa.me/8801788350024?text=আমি Premium Watch কিনতে চাই" class="wa-btn">WhatsApp Order</a>
+        </div>
+        <div class="card" data-cat="headphone" data-name="bluetooth headphone">
+            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" onclick="openZoom(this.src, 'Headphone')">
+            <h4 class="p-title">Headphone</h4>
+            <p style="color:var(--primary); font-weight:bold;">৳ ৮৫০</p>
+            <a href="https://wa.me/8801788350024?text=আমি Headphone কিনতে চাই" class="wa-btn">WhatsApp Order</a>
+        </div>
     </div>
 
-    <div style="margin: 30px 0; color: #64748b; font-size: 0.8rem;">
-        <p>"মৃত্যু ব্যতীত আমাকে থামানোর মতো কেউ নেই!"</p>
-        <p>&copy; 2026 The Max Ecosystem</p>
+    <div id="modal" onclick="this.style.display='none'">
+        <img id="m-img" src="">
+        <h3 id="m-title"></h3>
     </div>
+
+    <div id="settings-ui">
+        <div class="set-row">
+            <span class="set-label" id="l-label">ভাষা পরিবর্তন (Language)</span>
+            <div class="set-flex">
+                <button class="opt-btn active" id="bn-btn" onclick="setLang('bn')">বাংলা</button>
+                <button class="opt-btn" id="en-btn" onclick="setLang('en')">English</button>
+            </div>
+        </div>
+        <div class="set-row">
+            <span class="set-label" id="t-label">থিম পরিবর্তন (Theme)</span>
+            <div class="set-flex">
+                <button class="opt-btn active" id="dark-btn" onclick="setTheme('dark')">ডার্ক</button>
+                <button class="opt-btn" onclick="setTheme('light')">লাইট</button>
+            </div>
+        </div>
+        <button class="wa-btn" style="background:#555;" onclick="toggleSet()">বন্ধ করুন</button>
+    </div>
+
+    <footer>
+        <h3 style="color:var(--primary);">SHOP H (Hybrid)</h3>
+        <p>মেইন কোম্পানি: THE MAX | বাংলাদেশ 🇧🇩</p>
+        <p>Helpline: 01788350024</p>
+    </footer>
+
+    <div style="position:fixed; bottom:20px; right:20px; background:var(--primary); width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="toggleSet()">⚙️</div>
 
     <script>
-        function startTime() {
-            const today = new Date();
-            let h = today.getHours();
-            let m = today.getMinutes();
-            let s = today.getSeconds();
-            m = checkTime(m);
-            s = checkTime(s);
-            document.getElementById('clock').innerHTML = h + ":" + m + ":" + s;
-            setTimeout(startTime, 1000);
+        function setLang(l) {
+            const d = {
+                bn: { s:"পণ্য খুঁজুন...", t:"সেরা কালেকশন ২০২৬", p:"👤 সাইন ইন", l:"ভাষা পরিবর্তন (Language)", th:"থিম পরিবর্তন (Theme)" },
+                en: { s:"Search product...", t:"NEW ARRIVAL 2026", p:"👤 Sign in", l:"Change Language", th:"Change Theme" }
+            };
+            document.getElementById('mainSearch').placeholder = d[l].s;
+            document.getElementById('slide-t').innerText = d[l].t;
+            document.getElementById('p-label').innerText = d[l].p;
+            document.getElementById('l-label').innerText = d[l].l;
+            document.getElementById('t-label').innerText = d[l].th;
+            document.getElementById('bn-btn').classList.toggle('active', l==='bn');
+            document.getElementById('en-btn').classList.toggle('active', l==='en');
         }
-        function checkTime(i) {
-            if (i < 10) {i = "0" + i};  // ১০ এর কম হলে সামনে ০ যোগ করবে
-            return i;
+
+        function filterData(c, b) {
+            let cards = document.querySelectorAll('.card');
+            let btns = document.querySelectorAll('.cat-btn');
+            btns.forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            cards.forEach(x => {
+                x.style.display = (c==='all' || x.getAttribute('data-cat')===c) ? 'block' : 'none';
+            });
+        }
+
+        function smartSearch() {
+            let q = document.getElementById('mainSearch').value.toLowerCase();
+            let cards = document.querySelectorAll('.card');
+            document.getElementById('hero-slider').style.display = q ? 'none' : 'flex';
+            cards.forEach(x => {
+                x.style.display = x.getAttribute('data-name').includes(q) ? 'block' : 'none';
+            });
+        }
+
+        function openZoom(s, t) {
+            document.getElementById('m-img').src = s;
+            document.getElementById('m-title').innerText = t;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function toggleSet() {
+            let s = document.getElementById('settings-ui');
+            s.style.display = (s.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function setTheme(m) {
+            document.body.className = m + '-theme';
+        }
+
+        function adminLogin() {
+            document.getElementById('p-label').innerText = "👤 Naim (Admin)";
+            alert("স্বাগতম নাঈম বন্ধু!");
         }
     </script>
-
 </body>
 </html>
