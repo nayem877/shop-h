@@ -3,178 +3,285 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHOP H | Smart Hybrid Dynamic</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>THE MAX | Ultra Secure v1.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        :root { --primary:#2ea043; --bg:#0b1118; --card:#1c2128; --text:#ffffff; }
-        .light-theme { --bg:#f5f6f7; --card:#ffffff; --text:#1c1e21; }
+        :root{ --primary:#2ea043; --bg:#0b1118; --card:#1c2128; --text:#ffffff; --border:#30363d; --success: #2ea043; --error: #ff4444; }
+        .light-mode { --bg:#f5f6f7; --card:#ffffff; --text:#1c1e21; --border:#ddd; }
+
+        *{ box-sizing:border-box; margin:0; padding:0; font-family:'Hind Siliguri', sans-serif; }
+        body{ background:var(--bg); color:var(--text); transition:.4s; overflow-x: hidden; }
+
+        header{ display:flex; justify-content:space-between; align-items:center; padding:15px; border-bottom:2px solid var(--primary); position:sticky; top:0; background:var(--bg); z-index:1000; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .logo{ font-size:24px; font-weight:700; color:var(--primary); }
+        .nav-icons { display: flex; gap: 18px; align-items: center; }
+        .icon-btn { cursor: pointer; font-size: 20px; color: var(--primary); transition: 0.3s; }
+
+        .cat-wrap { display: flex; gap: 10px; padding: 15px; overflow-x: auto; scrollbar-width: none; }
+        .cat-btn { background: var(--card); border: 1px solid var(--border); padding: 10px 22px; border-radius: 25px; white-space: nowrap; cursor: pointer; color: var(--text); font-size: 14px; transition: 0.3s; }
+        .cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        #admin-panel{ display:none; padding:25px; background: rgba(46, 160, 67, 0.05); border: 2px dashed var(--primary); margin: 15px; border-radius: 25px; animation: slideDown 0.5s ease; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .admin-input{ width:100%; padding:14px; margin-bottom:12px; border-radius:12px; border:1px solid var(--border); background: var(--card); color: var(--text); outline: none; }
+        .btn-group { display: flex; gap: 10px; }
+        button{ padding:12px; border:none; border-radius:12px; cursor:pointer; font-weight:bold; transition: 0.3s; }
+        .add-btn{ background:var(--primary); color:white; flex:2; }
+        .logout-btn{ background:var(--error); color:white; flex:1; }
+
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 4px; background: var(--primary); z-index: 2000; visibility: hidden; }
+        #loader.active { visibility: visible; animation: loadingBar 2s infinite; }
+        @keyframes loadingBar { 0% { left: -100%; width: 30%; } 100% { left: 100%; width: 0%; } }
         
-        * { box-sizing:border-box; margin:0; padding:0; font-family:'Poppins',sans-serif; transition:0.3s; }
-        body { background:var(--bg); color:var(--text); overflow-x:hidden; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--card); padding: 12px 25px; border-radius: 50px; border: 1px solid var(--primary); z-index: 9999; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-weight: 600; text-align: center; min-width: 200px; }
+        .toast.show { display: block; animation: fadeInUp 0.4s; }
 
-        /* Header */ 
-        header { position:sticky; top:0; z-index:1000; display:flex; justify-content:space-between; align-items:center; padding:15px; background:var(--bg); border-bottom:2px solid var(--primary); } 
-        .logo { font-size:24px; font-weight:800; color:var(--primary); letter-spacing:1px; } 
-        .profile { cursor:pointer; display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:var(--primary); border:1px solid var(--primary); padding:5px 12px; border-radius:20px; }
+        .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:15px; padding:15px; }
+        .card{ background:var(--card); border-radius:25px; padding:12px; text-align:center; border:1px solid var(--border); transition: 0.3s; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .card img{ width:100%; height:160px; object-fit:cover; border-radius:18px; cursor:pointer; }
+        .warranty-tag { background: rgba(46, 160, 67, 0.15); color: var(--primary); font-size: 10px; padding: 4px 10px; border-radius: 8px; display: inline-block; margin-top: 10px; font-weight: bold; }
+        .card h4 { margin: 12px 0 5px; font-size: 15px; height: 40px; overflow: hidden; }
+        .price-row { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .price{ color:var(--primary); font-weight:700; font-size: 18px; }
+        .old-price { color: #888; text-decoration: line-through; font-size: 13px; }
+        .wa-btn{ background:#25d366; color:white; padding:12px; border-radius:12px; text-decoration:none; font-size:13px; font-weight:bold; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .delete-btn { position: absolute; top: 10px; right: 10px; background: var(--error); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; display: none; z-index: 10; cursor: pointer; }
 
-        /* Category Filter */ 
-        .cat-container { display:flex; overflow-x:auto; gap:10px; padding:12px; background:var(--card); margin:10px; border-radius:15px; border:1px solid #30363d; scrollbar-width:none; } 
-        .cat-btn { padding:10px 18px; background:#0b1118; border-radius:10px; white-space:nowrap; cursor:pointer; border:1px solid var(--primary); font-size:13px; font-weight:bold; color:white; } 
-        .cat-btn.active { background:var(--primary); color:white; }
-
-        /* Search */ 
-        .search-wrap { padding:0 15px; margin:10px 0; } 
-        .search-input { width:100%; padding:14px 20px; border-radius:30px; border:2px solid var(--primary); background:var(--card); color:var(--text); font-size:15px; outline:none; }
-
-        /* Hero Slider */ 
-        #hero-slider { margin:15px; height:200px; border-radius:20px; overflow:hidden; position:relative; border:1px solid var(--primary); display: flex; align-items: center; justify-content: center; text-align: center; background: linear-gradient(135deg, #1c2128, #2ea043); } 
-
-        /* Product Grid */ 
-        .grid { display:grid; grid-template-columns:1fr 1fr; gap:15px; padding:15px; } 
-        .card { background:var(--card); border-radius:20px; padding:15px; text-align:center; border:1px solid #30363d; animation:fadeIn 0.5s; } 
-        @keyframes fadeIn { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} } 
-        .card img { width:100%; height:140px; border-radius:12px; cursor:pointer; object-fit:cover; border:1px solid #30363d; }
-
-        /* Zoom Modal */ 
-        #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:5000; justify-content:center; align-items:center; flex-direction:column; } 
-        #modal img { max-width:95%; max-height:70%; border-radius:15px; border:2px solid var(--primary); } 
-
-        /* Settings Panel */ 
-        #settings-ui { display:none; position:fixed; bottom:0; width:100%; background:var(--card); padding:30px; border-radius:30px 30px 0 0; border-top:4px solid var(--primary); z-index:4000; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); } 
-        .set-row { margin-bottom:20px; } 
-        .set-label { font-weight:bold; color:var(--primary); margin-bottom:10px; display:block; } 
-        .set-flex { display:flex; gap:10px; } 
-        .opt-btn { flex:1; padding:15px; border-radius:12px; border:none; font-weight:bold; cursor:pointer; background:#0b1118; color:white; }
-        .opt-btn.active { background: var(--primary); }
-
-        /* Buttons & Footer */
-        .wa-btn { background:#25d366; color:white; padding:10px; border-radius:10px; text-decoration:none; display:block; margin-top:10px; font-weight:bold; font-size:12px; }
-        footer { padding:30px 20px; text-align:center; background:var(--card); border-top:1px solid var(--primary); margin-top:20px; }
+        .modal{ display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); justify-content:center; align-items:center; z-index:5000; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--card); padding: 25px; border-radius: 30px; max-width: 90%; width: 360px; text-align: center; border: 1px solid var(--border); }
+        .modal img{ width:100%; border-radius:20px; }
     </style>
 </head>
-<body class="dark-theme">
+<body class="dark-mode">
 
-    <header>
-        <div class="logo">SHOP H</div>
-        <div class="profile" onclick="adminLogin()" id="p-label">👤 Sign in</div>
-    </header>
+<div id="loader"></div>
+<div id="toast-msg" class="toast"></div>
 
-    <div class="cat-container">
-        <div class="cat-btn active" onclick="filterData('all', this)" id="all-btn">সব পণ্য</div>
-        <div class="cat-btn" onclick="filterData('watch', this)">ঘড়ি (Watch)</div>
-        <div class="cat-btn" onclick="filterData('headphone', this)">হেডফোন</div>
+<header>
+    <div class="logo">THE MAX</div>
+    <div class="nav-icons">
+        <i class="fas fa-adjust icon-btn" onclick="toggleTheme()"></i>
+        <div class="icon-btn" onclick="handleAdminAuth()"><i class="fas fa-shield-alt"></i></div>
     </div>
+</header>
 
-    <div class="search-wrap">
-        <input type="text" class="search-input" id="mainSearch" placeholder="পণ্য খুঁজুন..." onkeyup="smartSearch()">
+<div class="cat-wrap" id="cat-filters">
+    <button class="cat-btn active" onclick="filterCat('all', this)">সব পণ্য</button>
+    <button class="cat-btn" onclick="filterCat('watch', this)">ঘড়ি</button>
+    <button class="cat-btn" onclick="filterCat('headphone', this)">হেডফোন</button>
+    <button class="cat-btn" onclick="filterCat('gadget', this)">গ্যাজেট</button>
+</div>
+
+<div id="admin-panel">
+    <h3 style="margin-bottom:15px; color:var(--primary)">➕ অ্যাডমিন কন্ট্রোল</h3>
+    <input type="text" id="pname" class="admin-input" placeholder="পণ্যের নাম">
+    <input type="number" id="pprice" class="admin-input" placeholder="বিক্রয় মূল্য (৳)">
+    <input type="number" id="poldprice" class="admin-input" placeholder="আগের মূল্য (৳)">
+    <input type="text" id="pimg" class="admin-input" placeholder="ছবির লিঙ্ক (Direct URL)">
+    <input type="text" id="pwarranty" class="admin-input" placeholder="ওয়ারেন্টি (উদা: 7 Days)">
+    <select id="pcat" class="admin-input">
+        <option value="watch">ঘড়ি</option>
+        <option value="headphone">হেডফোন</option>
+        <option value="gadget">গ্যাজেট</option>
+    </select>
+    <div class="btn-group">
+        <button class="add-btn" onclick="addProductToFirebase()">সেভ করুন</button>
+        <button class="logout-btn" onclick="adminLogout()">লগআউট</button>
     </div>
+</div>
 
-    <div id="hero-slider">
-        <div style="color:white; padding:20px;">
-            <h2 id="slide-t">GORGEOUS PRODUCT 1</h2>
-            <p id="slide-s">আমাদের সেরা কালেকশন দেখুন</p>
+<div class="grid" id="product-list"></div>
+
+<div class="modal" id="zoomModal">
+    <div class="modal-content">
+        <img id="zoomImg">
+        <h3 id="zoomTitle" style="margin-top:15px"></h3>
+        <p id="zoomWarranty" style="color:var(--primary); font-size: 14px; margin-top:5px;"></p>
+        <button class="wa-btn" id="modalOrderBtn" style="margin-top:15px; width:100%">অর্ডার নিশ্চিত করুন</button>
+        <button onclick="closeModal()" style="margin-top:10px; background:transparent; color:var(--text)">বন্ধ করুন</button>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAoZzONz8I2W70_b4oR_7cGxbQCmDaipWg",
+    authDomain: "shop-h-215df.firebaseapp.com",
+    projectId: "shop-h-215df",
+    storageBucket: "shop-h-215df.firebasestorage.app",
+    messagingSenderId: "60483176788",
+    appId: "1:60483176788:web:cdadf8c99fccb3d20620c1",
+    measurementId: "G-CD5JVG7225"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  let isAdmin = false;
+  let allProducts = [];
+  let currentFilter = 'all';
+  let unsubscribeListener = null;
+
+  // 🔹 ১. XSS Protection: HTML স্যানিটাইজেশন ফাংশন
+  function sanitize(str) {
+    const temp = document.createElement('div');
+    temp.textContent = str;
+    return temp.innerHTML;
+  }
+
+  // 🔹 ২. লিসেনার (Fixed: Error handling & null timestamp metadata)
+  function startListening() {
+    if (unsubscribeListener) unsubscribeListener();
+    
+    // includeMetadataChanges: true ব্যবহার করা হয়েছে যাতে সার্ভার টাইমস্ট্যাম্প আসার আগে ক্র্যাশ না করে
+    unsubscribeListener = db.collection('products').orderBy('createdAt', 'desc').onSnapshot({ includeMetadataChanges: true }, snapshot => {
+      allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      applyFilter();
+    }, error => {
+      console.error("Firestore Error:", error);
+      showToast("ডাটা লোড করতে সমস্যা হচ্ছে!", "error");
+    });
+  }
+
+  // 🔹 ৩. অ্যাডমিন চেক (Fixed: Restricted Email)
+  async function handleAdminAuth() {
+    if(isAdmin) return;
+    const email = prompt("Admin Email:");
+    const pass = prompt("Password:");
+    if(email && pass) {
+        showLoader(true);
+        try {
+            await auth.signInWithEmailAndPassword(email, pass);
+        } catch(e) { 
+            showToast("লগইন ভুল হয়েছে!", "error"); 
+            showLoader(false);
+        }
+    }
+  }
+
+  auth.onAuthStateChanged(user => {
+    isAdmin = user && user.email === "nayemhossen20005@gmail.com";
+    document.getElementById("admin-panel").style.display = isAdmin ? "block" : "none";
+    if (user && !isAdmin) {
+        showToast("আপনি অ্যাডমিন নন!", "error");
+        auth.signOut();
+    } else if (isAdmin) {
+        showToast("স্বাগতম অ্যাডমিন!", "success");
+    }
+    startListening();
+    showLoader(false);
+  });
+
+  function adminLogout() {
+    auth.signOut();
+    showToast("লগআউট সফল!", "success");
+  }
+
+  // 🔹 ৪. প্রোডাক্ট ম্যানেজমেন্ট (Fixed: Validation & Number conversion)
+  async function addProductToFirebase() {
+    if(!isAdmin) return showToast("অনুমতি নেই!", "error");
+
+    const p = {
+        name: sanitize(document.getElementById("pname").value),
+        price: parseFloat(document.getElementById("pprice").value),
+        oldPrice: parseFloat(document.getElementById("poldprice").value) || null,
+        img: sanitize(document.getElementById("pimg").value),
+        warranty: sanitize(document.getElementById("pwarranty").value),
+        cat: document.getElementById("pcat").value,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp() // Server-side sorting
+    };
+
+    // Improved Validation (isNaN check for price)
+    if(!p.name || isNaN(p.price) || !p.img) return showToast("সব তথ্য সঠিকভাবে দিন!", "error");
+
+    showLoader(true);
+    try {
+        await db.collection('products').add(p);
+        showToast("পণ্য সফলভাবে যোগ হয়েছে!", "success");
+        clearForm();
+    } catch(e) { 
+        showToast("সেভ করতে সমস্যা হয়েছে!", "error"); 
+    } finally { showLoader(false); }
+  }
+
+  async function deleteProduct(id) {
+    if(!isAdmin) return showToast("অনুমতি নেই!", "error");
+    if(confirm("মুছে ফেলতে চান?")) {
+        showLoader(true);
+        try {
+            await db.collection('products').doc(id).delete();
+            showToast("মুছে ফেলা হয়েছে!", "success");
+        } finally { showLoader(false); }
+    }
+  }
+
+  function filterCat(cat, btn) {
+    currentFilter = cat;
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilter();
+  }
+
+  function applyFilter() {
+    const data = currentFilter === 'all' ? allProducts : allProducts.filter(p => p.cat === currentFilter);
+    renderProducts(data);
+  }
+
+  function renderProducts(data) {
+    const list = document.getElementById("product-list");
+    if(!data.length) {
+        list.innerHTML = `<div style="grid-column: 1/3; text-align:center; padding:50px; opacity:0.5;">কোনো পণ্য পাওয়া যায়নি।</div>`;
+        return;
+    }
+    
+    // Using sanitize logic while rendering to prevent XSS
+    list.innerHTML = data.map(p => `
+      <div class="card">
+        <button class="delete-btn" style="display: ${isAdmin ? 'block':'none'}" onclick="deleteProduct('${p.id}')">×</button>
+        <img src="${p.img}" onclick="zoom('${p.img}','${sanitize(p.name)}', '${sanitize(p.warranty)}')" alt="${sanitize(p.name)}">
+        <span class="warranty-tag">${sanitize(p.warranty) || 'No Warranty'}</span>
+        <h4>${sanitize(p.name)}</h4>
+        <div class="price-row">
+          <span class="price">৳${p.price}</span>
+          ${p.oldPrice ? `<span class="old-price">৳${p.oldPrice}</span>` : ''}
         </div>
-    </div>
+        <a class="wa-btn" href="https://wa.me/8801788350024?text=আমি এটি নিতে চাই: ${sanitize(p.name)}">
+          <i class="fab fa-whatsapp"></i> অর্ডার করুন
+        </a>
+      </div>`).join('');
+  }
 
-    <div class="grid" id="product-list">
-        <div class="card" data-cat="watch" data-name="premium smart watch">
-            <img src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500" onclick="openZoom(this.src, 'Premium Watch')">
-            <h4 class="p-title">Premium Watch</h4>
-            <p style="color:var(--primary); font-weight:bold;">৳ ১,৫০০</p>
-            <a href="https://wa.me/8801788350024?text=আমি Premium Watch কিনতে চাই" class="wa-btn">WhatsApp Order</a>
-        </div>
-        <div class="card" data-cat="headphone" data-name="bluetooth headphone">
-            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" onclick="openZoom(this.src, 'Headphone')">
-            <h4 class="p-title">Headphone</h4>
-            <p style="color:var(--primary); font-weight:bold;">৳ ৮৫০</p>
-            <a href="https://wa.me/8801788350024?text=আমি Headphone কিনতে চাই" class="wa-btn">WhatsApp Order</a>
-        </div>
-    </div>
+  function toggleTheme() { document.body.classList.toggle('light-mode'); }
+  function showLoader(show) { document.getElementById("loader").classList.toggle('active', show); }
+  
+  function showToast(msg, type) {
+    const t = document.getElementById("toast-msg");
+    t.innerText = msg;
+    t.style.borderColor = type === 'success' ? 'var(--success)' : 'var(--error)';
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 3000);
+  }
 
-    <div id="modal" onclick="this.style.display='none'">
-        <img id="m-img" src="">
-        <h3 id="m-title"></h3>
-    </div>
+  function clearForm() {
+    ['pname','pprice','poldprice','pimg','pwarranty'].forEach(id => document.getElementById(id).value = '');
+  }
 
-    <div id="settings-ui">
-        <div class="set-row">
-            <span class="set-label" id="l-label">ভাষা পরিবর্তন (Language)</span>
-            <div class="set-flex">
-                <button class="opt-btn active" id="bn-btn" onclick="setLang('bn')">বাংলা</button>
-                <button class="opt-btn" id="en-btn" onclick="setLang('en')">English</button>
-            </div>
-        </div>
-        <div class="set-row">
-            <span class="set-label" id="t-label">থিম পরিবর্তন (Theme)</span>
-            <div class="set-flex">
-                <button class="opt-btn active" id="dark-btn" onclick="setTheme('dark')">ডার্ক</button>
-                <button class="opt-btn" onclick="setTheme('light')">লাইট</button>
-            </div>
-        </div>
-        <button class="wa-btn" style="background:#555;" onclick="toggleSet()">বন্ধ করুন</button>
-    </div>
+  function zoom(img, title, warranty) {
+    document.getElementById("zoomImg").src = img;
+    document.getElementById("zoomTitle").innerText = title;
+    document.getElementById("zoomWarranty").innerText = warranty || "No Warranty";
+    document.getElementById("modalOrderBtn").onclick = () => window.open(`https://wa.me/8801788350024?text=অর্ডার করতে চাই: ${title}`);
+    document.getElementById("zoomModal").style.display = "flex";
+  }
 
-    <footer>
-        <h3 style="color:var(--primary);">SHOP H (Hybrid)</h3>
-        <p>মেইন কোম্পানি: THE MAX | বাংলাদেশ 🇧🇩</p>
-        <p>Helpline: 01788350024</p>
-    </footer>
-
-    <div style="position:fixed; bottom:20px; right:20px; background:var(--primary); width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="toggleSet()">⚙️</div>
-
-    <script>
-        function setLang(l) {
-            const d = {
-                bn: { s:"পণ্য খুঁজুন...", t:"সেরা কালেকশন ২০২৬", p:"👤 সাইন ইন", l:"ভাষা পরিবর্তন (Language)", th:"থিম পরিবর্তন (Theme)" },
-                en: { s:"Search product...", t:"NEW ARRIVAL 2026", p:"👤 Sign in", l:"Change Language", th:"Change Theme" }
-            };
-            document.getElementById('mainSearch').placeholder = d[l].s;
-            document.getElementById('slide-t').innerText = d[l].t;
-            document.getElementById('p-label').innerText = d[l].p;
-            document.getElementById('l-label').innerText = d[l].l;
-            document.getElementById('t-label').innerText = d[l].th;
-            document.getElementById('bn-btn').classList.toggle('active', l==='bn');
-            document.getElementById('en-btn').classList.toggle('active', l==='en');
-        }
-
-        function filterData(c, b) {
-            let cards = document.querySelectorAll('.card');
-            let btns = document.querySelectorAll('.cat-btn');
-            btns.forEach(x => x.classList.remove('active'));
-            b.classList.add('active');
-            cards.forEach(x => {
-                x.style.display = (c==='all' || x.getAttribute('data-cat')===c) ? 'block' : 'none';
-            });
-        }
-
-        function smartSearch() {
-            let q = document.getElementById('mainSearch').value.toLowerCase();
-            let cards = document.querySelectorAll('.card');
-            document.getElementById('hero-slider').style.display = q ? 'none' : 'flex';
-            cards.forEach(x => {
-                x.style.display = x.getAttribute('data-name').includes(q) ? 'block' : 'none';
-            });
-        }
-
-        function openZoom(s, t) {
-            document.getElementById('m-img').src = s;
-            document.getElementById('m-title').innerText = t;
-            document.getElementById('modal').style.display = 'flex';
-        }
-
-        function toggleSet() {
-            let s = document.getElementById('settings-ui');
-            s.style.display = (s.style.display === 'block') ? 'none' : 'block';
-        }
-
-        function setTheme(m) {
-            document.body.className = m + '-theme';
-        }
-
-        function adminLogin() {
-            document.getElementById('p-label').innerText = "👤 Naim (Admin)";
-            alert("স্বাগতম নাঈম বন্ধু!");
-        }
-    </script>
+  function closeModal() { document.getElementById("zoomModal").style.display = "none"; }
+</script>
 </body>
 </html>
