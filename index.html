@@ -3,285 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE MAX | Ultra Secure v1.0</title>
+    <title>THE MAX | Ultimate v4.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root{ --primary:#2ea043; --bg:#0b1118; --card:#1c2128; --text:#ffffff; --border:#30363d; --success: #2ea043; --error: #ff4444; }
-        .light-mode { --bg:#f5f6f7; --card:#ffffff; --text:#1c1e21; --border:#ddd; }
-
+        :root{ --primary:#2ea043; --bg:#0b1118; --card:#1c2128; --text:#ffffff; --border:#30363d; --error: #ff4444; }
+        .light-mode { --bg:#f0f2f5; --card:#ffffff; --text:#1c1e21; --border:#ddd; }
         *{ box-sizing:border-box; margin:0; padding:0; font-family:'Hind Siliguri', sans-serif; }
         body{ background:var(--bg); color:var(--text); transition:.4s; overflow-x: hidden; }
 
-        header{ display:flex; justify-content:space-between; align-items:center; padding:15px; border-bottom:2px solid var(--primary); position:sticky; top:0; background:var(--bg); z-index:1000; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        .logo{ font-size:24px; font-weight:700; color:var(--primary); }
-        .nav-icons { display: flex; gap: 18px; align-items: center; }
-        .icon-btn { cursor: pointer; font-size: 20px; color: var(--primary); transition: 0.3s; }
+        /* Loader & Toasts */
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 4px; background: var(--primary); z-index: 5000; display: none; }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 12px 25px; border-radius: 50px; display: none; z-index: 6000; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
 
-        .cat-wrap { display: flex; gap: 10px; padding: 15px; overflow-x: auto; scrollbar-width: none; }
-        .cat-btn { background: var(--card); border: 1px solid var(--border); padding: 10px 22px; border-radius: 25px; white-space: nowrap; cursor: pointer; color: var(--text); font-size: 14px; transition: 0.3s; }
-        .cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        header{ display:flex; justify-content:space-between; align-items:center; padding:15px; border-bottom:2px solid var(--primary); position:sticky; top:0; background:var(--bg); z-index:1000; }
+        .logo{ font-size:24px; font-weight:700; color:var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+        .nav-icons { display: flex; gap: 15px; align-items: center; }
+        .icon-btn { cursor: pointer; font-size: 20px; color: var(--primary); }
+        .lang-btn { background: var(--primary); color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        #admin-panel{ display:none; padding:25px; background: rgba(46, 160, 67, 0.05); border: 2px dashed var(--primary); margin: 15px; border-radius: 25px; animation: slideDown 0.5s ease; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        .admin-input{ width:100%; padding:14px; margin-bottom:12px; border-radius:12px; border:1px solid var(--border); background: var(--card); color: var(--text); outline: none; }
-        .btn-group { display: flex; gap: 10px; }
-        button{ padding:12px; border:none; border-radius:12px; cursor:pointer; font-weight:bold; transition: 0.3s; }
-        .add-btn{ background:var(--primary); color:white; flex:2; }
-        .logout-btn{ background:var(--error); color:white; flex:1; }
+        .search-area { padding: 15px; }
+        .search-bar { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); outline: none; font-size: 16px; }
 
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 4px; background: var(--primary); z-index: 2000; visibility: hidden; }
-        #loader.active { visibility: visible; animation: loadingBar 2s infinite; }
-        @keyframes loadingBar { 0% { left: -100%; width: 30%; } 100% { left: 100%; width: 0%; } }
-        
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--card); padding: 12px 25px; border-radius: 50px; border: 1px solid var(--primary); z-index: 9999; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-weight: 600; text-align: center; min-width: 200px; }
-        .toast.show { display: block; animation: fadeInUp 0.4s; }
+        .cat-scroll { display: flex; gap: 10px; padding: 0 15px 15px; overflow-x: auto; scrollbar-width: none; }
+        .cat-chip { background: var(--card); border: 1px solid var(--border); padding: 8px 20px; border-radius: 25px; white-space: nowrap; cursor: pointer; transition: 0.3s; font-size: 14px; }
+        .cat-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:15px; padding:15px; }
-        .card{ background:var(--card); border-radius:25px; padding:12px; text-align:center; border:1px solid var(--border); transition: 0.3s; position: relative; display: flex; flex-direction: column; overflow: hidden; }
-        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        .card img{ width:100%; height:160px; object-fit:cover; border-radius:18px; cursor:pointer; }
-        .warranty-tag { background: rgba(46, 160, 67, 0.15); color: var(--primary); font-size: 10px; padding: 4px 10px; border-radius: 8px; display: inline-block; margin-top: 10px; font-weight: bold; }
-        .card h4 { margin: 12px 0 5px; font-size: 15px; height: 40px; overflow: hidden; }
-        .price-row { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 12px; }
-        .price{ color:var(--primary); font-weight:700; font-size: 18px; }
-        .old-price { color: #888; text-decoration: line-through; font-size: 13px; }
-        .wa-btn{ background:#25d366; color:white; padding:12px; border-radius:12px; text-decoration:none; font-size:13px; font-weight:bold; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .delete-btn { position: absolute; top: 10px; right: 10px; background: var(--error); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; display: none; z-index: 10; cursor: pointer; }
+        #admin-box{ display:none; padding:20px; background: rgba(46, 160, 67, 0.05); border: 1px dashed var(--primary); margin: 15px; border-radius: 20px; }
+        .in { width:100%; padding:12px; margin-bottom:10px; border-radius:10px; border:1px solid var(--border); background: var(--card); color: var(--text); }
 
-        .modal{ display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); justify-content:center; align-items:center; z-index:5000; backdrop-filter: blur(5px); }
-        .modal-content { background: var(--card); padding: 25px; border-radius: 30px; max-width: 90%; width: 360px; text-align: center; border: 1px solid var(--border); }
-        .modal img{ width:100%; border-radius:20px; }
+        .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; padding:15px; }
+        .card{ background:var(--card); border-radius:20px; padding:12px; text-align:center; border:1px solid var(--border); position: relative; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card img{ width:100%; height:160px; object-fit:cover; border-radius:15px; cursor: pointer; }
+        .card h4 { margin: 12px 0 5px; font-size: 15px; height: 40px; overflow: hidden; line-height: 1.3; }
+        .price{ color:var(--primary); font-weight:700; font-size: 18px; margin-bottom: 12px; display: block; }
+        .buy-btn{ background:var(--primary); color:white; padding:12px; border-radius:12px; width: 100%; border: none; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .del { position: absolute; top: 8px; right: 8px; background: var(--error); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; display: none; z-index: 5; }
+
+        /* Full Details Modal */
+        .modal{ display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); justify-content:center; align-items:center; z-index:3000; padding:20px; }
+        .modal-content { background: var(--card); padding: 25px; border-radius: 25px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; position: relative; }
+        .video-box { width: 100%; height: 200px; border-radius: 15px; margin: 15px 0; background: #000; }
+        .feature-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 14px; color: #aaa; }
+        .color-dot { width: 15px; height: 15px; border-radius: 50%; border: 1px solid #fff; display: inline-block; }
+
+        footer { padding: 40px 20px; text-align: center; border-top: 1px solid var(--border); margin-top: 30px; }
+        .socials { display: flex; justify-content: center; gap: 25px; margin-bottom: 15px; }
+        .socials a { color: var(--primary); font-size: 28px; transition: 0.3s; }
     </style>
 </head>
 <body class="dark-mode">
 
 <div id="loader"></div>
-<div id="toast-msg" class="toast"></div>
+<div id="toast" class="toast"></div>
 
 <header>
     <div class="logo">THE MAX</div>
     <div class="nav-icons">
-        <i class="fas fa-adjust icon-btn" onclick="toggleTheme()"></i>
-        <div class="icon-btn" onclick="handleAdminAuth()"><i class="fas fa-shield-alt"></i></div>
+        <button class="lang-btn" onclick="toggleLanguage()" id="lSwitch">EN</button>
+        <i class="fas fa-moon icon-btn" onclick="toggleTheme()" id="tIcon"></i>
+        <i class="fas fa-lock icon-btn" onclick="authAdmin()"></i>
     </div>
 </header>
 
-<div class="cat-wrap" id="cat-filters">
-    <button class="cat-btn active" onclick="filterCat('all', this)">সব পণ্য</button>
-    <button class="cat-btn" onclick="filterCat('watch', this)">ঘড়ি</button>
-    <button class="cat-btn" onclick="filterCat('headphone', this)">হেডফোন</button>
-    <button class="cat-btn" onclick="filterCat('gadget', this)">গ্যাজেট</button>
+<div class="search-area">
+    <input type="text" id="sInp" class="search-bar" placeholder="পণ্য খুঁজুন..." oninput="syncFilter()">
 </div>
 
-<div id="admin-panel">
-    <h3 style="margin-bottom:15px; color:var(--primary)">➕ অ্যাডমিন কন্ট্রোল</h3>
-    <input type="text" id="pname" class="admin-input" placeholder="পণ্যের নাম">
-    <input type="number" id="pprice" class="admin-input" placeholder="বিক্রয় মূল্য (৳)">
-    <input type="number" id="poldprice" class="admin-input" placeholder="আগের মূল্য (৳)">
-    <input type="text" id="pimg" class="admin-input" placeholder="ছবির লিঙ্ক (Direct URL)">
-    <input type="text" id="pwarranty" class="admin-input" placeholder="ওয়ারেন্টি (উদা: 7 Days)">
-    <select id="pcat" class="admin-input">
-        <option value="watch">ঘড়ি</option>
-        <option value="headphone">হেডফোন</option>
-        <option value="gadget">গ্যাজেট</option>
+<div class="cat-scroll">
+    <div class="cat-chip active" onclick="setCategory('all', this)" id="cAll">সব পণ্য</div>
+    <div class="cat-chip" onclick="setCategory('watch', this)" id="cW">ঘড়ি</div>
+    <div class="cat-chip" onclick="setCategory('headphone', this)" id="cH">হেডফোন</div>
+    <div class="cat-chip" onclick="setCategory('gadget', this)" id="cG">গ্যাজেট</div>
+</div>
+
+<div id="admin-box">
+    <h3 id="aHead">➕ নতুন পণ্য</h3><br>
+    <input type="text" id="pName" class="in" placeholder="নাম">
+    <input type="number" id="pPrice" class="in" placeholder="মূল্য (৳)">
+    <input type="text" id="pImg" class="in" placeholder="ছবির ডিরেক্ট লিঙ্ক">
+    <input type="text" id="pVid" class="in" placeholder="YouTube ভিডিও লিঙ্ক (ঐচ্ছিক)">
+    <input type="text" id="pColors" class="in" placeholder="কালারসমূহ (যেমন: Black, Red)">
+    <input type="text" id="pFeatures" class="in" placeholder="বৈশিষ্ট্যসমূহ (কমা দিয়ে লিখুন)">
+    <input type="text" id="pWarranty" class="in" placeholder="ওয়ারেন্টি">
+    <select id="pCat" class="in">
+        <option value="watch">Watch</option>
+        <option value="headphone">Headphone</option>
+        <option value="gadget">Gadget</option>
     </select>
-    <div class="btn-group">
-        <button class="add-btn" onclick="addProductToFirebase()">সেভ করুন</button>
-        <button class="logout-btn" onclick="adminLogout()">লগআউট</button>
-    </div>
+    <button class="buy-btn" onclick="uploadProduct()" id="aBtn">সেভ করুন</button>
 </div>
 
-<div class="grid" id="product-list"></div>
+<div class="grid" id="main-grid"></div>
 
-<div class="modal" id="zoomModal">
+<div class="modal" id="pModal">
     <div class="modal-content">
-        <img id="zoomImg">
-        <h3 id="zoomTitle" style="margin-top:15px"></h3>
-        <p id="zoomWarranty" style="color:var(--primary); font-size: 14px; margin-top:5px;"></p>
-        <button class="wa-btn" id="modalOrderBtn" style="margin-top:15px; width:100%">অর্ডার নিশ্চিত করুন</button>
-        <button onclick="closeModal()" style="margin-top:10px; background:transparent; color:var(--text)">বন্ধ করুন</button>
+        <i class="fas fa-times" style="position:absolute; top:15px; right:20px; cursor:pointer;" onclick="closeM()"></i>
+        <h3 id="mTitle">পণ্যের বিবরণ</h3>
+        <div id="mBody"></div>
+        <hr style="margin:20px 0; border:0.5px solid var(--border)">
+        <h3 id="oHead">অর্ডার ফরম</h3><br>
+        <input type="text" id="oName" class="in" placeholder="আপনার নাম">
+        <input type="text" id="oPhone" class="in" placeholder="মোবাইল নম্বর">
+        <input type="text" id="oAddr" class="in" placeholder="পূর্ণ ঠিকানা">
+        <p style="font-size:12px; margin-bottom:10px;">বিকাশ/নগদ (পার্সোনাল): <b>01788350024</b></p>
+        <input type="text" id="oTrx" class="in" placeholder="TrxID (টাকা পাঠানোর পর)">
+        <button class="buy-btn" id="oBtn" onclick="placeOrder()">অর্ডার নিশ্চিত করুন</button>
     </div>
 </div>
+
+<footer>
+    <div class="socials">
+        <a href="https://www.facebook.com/share/17ZHe2aFT1/" target="_blank"><i class="fab fa-facebook"></i></a>
+        <a href="https://www.youtube.com/@TheMaxshoph" target="_blank"><i class="fab fa-youtube"></i></a>
+    </div>
+    <p>© 2026 THE MAX - Nayem Hossen</p>
+</footer>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyAoZzONz8I2W70_b4oR_7cGxbQCmDaipWg",
-    authDomain: "shop-h-215df.firebaseapp.com",
-    projectId: "shop-h-215df",
-    storageBucket: "shop-h-215df.firebasestorage.app",
-    messagingSenderId: "60483176788",
-    appId: "1:60483176788:web:cdadf8c99fccb3d20620c1",
-    measurementId: "G-CD5JVG7225"
-  };
+    const fbConfig = {
+        apiKey: "AIzaSyAoZzONz8I2W70_b4oR_7cGxbQCmDaipWg",
+        authDomain: "shop-h-215df.firebaseapp.com",
+        projectId: "shop-h-215df",
+        appId: "1:60483176788:web:cdadf8c99fccb3d20620c1"
+    };
+    firebase.initializeApp(fbConfig);
+    const db = firebase.firestore(), auth = firebase.auth();
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+    let isAdmin = false, prods = [], curCat = 'all', lang = 'BN';
+    let selectedP = null;
 
-  let isAdmin = false;
-  let allProducts = [];
-  let currentFilter = 'all';
-  let unsubscribeListener = null;
-
-  // 🔹 ১. XSS Protection: HTML স্যানিটাইজেশন ফাংশন
-  function sanitize(str) {
-    const temp = document.createElement('div');
-    temp.textContent = str;
-    return temp.innerHTML;
-  }
-
-  // 🔹 ২. লিসেনার (Fixed: Error handling & null timestamp metadata)
-  function startListening() {
-    if (unsubscribeListener) unsubscribeListener();
-    
-    // includeMetadataChanges: true ব্যবহার করা হয়েছে যাতে সার্ভার টাইমস্ট্যাম্প আসার আগে ক্র্যাশ না করে
-    unsubscribeListener = db.collection('products').orderBy('createdAt', 'desc').onSnapshot({ includeMetadataChanges: true }, snapshot => {
-      allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      applyFilter();
-    }, error => {
-      console.error("Firestore Error:", error);
-      showToast("ডাটা লোড করতে সমস্যা হচ্ছে!", "error");
-    });
-  }
-
-  // 🔹 ৩. অ্যাডমিন চেক (Fixed: Restricted Email)
-  async function handleAdminAuth() {
-    if(isAdmin) return;
-    const email = prompt("Admin Email:");
-    const pass = prompt("Password:");
-    if(email && pass) {
-        showLoader(true);
-        try {
-            await auth.signInWithEmailAndPassword(email, pass);
-        } catch(e) { 
-            showToast("লগইন ভুল হয়েছে!", "error"); 
-            showLoader(false);
-        }
-    }
-  }
-
-  auth.onAuthStateChanged(user => {
-    isAdmin = user && user.email === "nayemhossen20005@gmail.com";
-    document.getElementById("admin-panel").style.display = isAdmin ? "block" : "none";
-    if (user && !isAdmin) {
-        showToast("আপনি অ্যাডমিন নন!", "error");
-        auth.signOut();
-    } else if (isAdmin) {
-        showToast("স্বাগতম অ্যাডমিন!", "success");
-    }
-    startListening();
-    showLoader(false);
-  });
-
-  function adminLogout() {
-    auth.signOut();
-    showToast("লগআউট সফল!", "success");
-  }
-
-  // 🔹 ৪. প্রোডাক্ট ম্যানেজমেন্ট (Fixed: Validation & Number conversion)
-  async function addProductToFirebase() {
-    if(!isAdmin) return showToast("অনুমতি নেই!", "error");
-
-    const p = {
-        name: sanitize(document.getElementById("pname").value),
-        price: parseFloat(document.getElementById("pprice").value),
-        oldPrice: parseFloat(document.getElementById("poldprice").value) || null,
-        img: sanitize(document.getElementById("pimg").value),
-        warranty: sanitize(document.getElementById("pwarranty").value),
-        cat: document.getElementById("pcat").value,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp() // Server-side sorting
+    const dictionary = {
+        BN: { s: "পণ্য খুঁজুন...", all: "সব পণ্য", w: "ঘড়ি", hp: "হেডফোন", gd: "গ্যাজেট", buy: "বিস্তারিত ও কিনুন", aH: "➕ নতুন পণ্য", aB: "সেভ করুন", oH: "অর্ডার ফরম", oB: "অর্ডার নিশ্চিত করুন", mH: "পণ্যের বিবরণ", success: "অর্ডার সফল হয়েছে!", name: "নাম", ph: "ফোন", ad: "ঠিকানা" },
+        EN: { s: "Search products...", all: "All Products", w: "Watch", hp: "Headphones", gd: "Gadgets", buy: "View & Buy", aH: "➕ Add Product", aB: "Save Product", oH: "Order Form", oB: "Confirm Order", mH: "Product Details", success: "Order Placed!", name: "Your Name", ph: "Phone No", ad: "Full Address" }
     };
 
-    // Improved Validation (isNaN check for price)
-    if(!p.name || isNaN(p.price) || !p.img) return showToast("সব তথ্য সঠিকভাবে দিন!", "error");
+    function toggleLanguage() {
+        lang = lang === 'BN' ? 'EN' : 'BN';
+        document.getElementById('lSwitch').innerText = lang === 'BN' ? 'EN' : 'BN';
+        document.getElementById('sInp').placeholder = dictionary[lang].s;
+        document.getElementById('cAll').innerText = dictionary[lang].all;
+        document.getElementById('cW').innerText = dictionary[lang].w;
+        document.getElementById('cH').innerText = dictionary[lang].hp;
+        document.getElementById('cG').innerText = dictionary[lang].gd;
+        document.getElementById('aHead').innerText = dictionary[lang].aH;
+        document.getElementById('aBtn').innerText = dictionary[lang].aB;
+        document.getElementById('oHead').innerText = dictionary[lang].oH;
+        document.getElementById('oBtn').innerText = dictionary[lang].oB;
+        document.getElementById('mTitle').innerText = dictionary[lang].mH;
+        render();
+    }
 
-    showLoader(true);
-    try {
+    async function authAdmin() {
+        if(isAdmin) return auth.signOut();
+        const e = prompt("Email:"), p = prompt("Pass:");
+        if(e && p) await auth.signInWithEmailAndPassword(e, p).catch(()=>alert("Login Failed"));
+    }
+
+    auth.onAuthStateChanged(u => {
+        isAdmin = u && u.email === "nayemhossen20005@gmail.com";
+        document.getElementById('admin-box').style.display = isAdmin ? 'block' : 'none';
+        db.collection('products').orderBy('createdAt', 'desc').onSnapshot(s => {
+            prods = s.docs.map(d => ({id: d.id, ...d.data()}));
+            render();
+        });
+    });
+
+    async function uploadProduct() {
+        const p = {
+            name: document.getElementById('pName').value,
+            price: Number(document.getElementById('pPrice').value),
+            img: document.getElementById('pImg').value,
+            vid: document.getElementById('pVid').value,
+            colors: document.getElementById('pColors').value,
+            features: document.getElementById('pFeatures').value,
+            warranty: document.getElementById('pWarranty').value,
+            cat: document.getElementById('pCat').value,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        document.getElementById('loader').style.display = 'block';
         await db.collection('products').add(p);
-        showToast("পণ্য সফলভাবে যোগ হয়েছে!", "success");
-        clearForm();
-    } catch(e) { 
-        showToast("সেভ করতে সমস্যা হয়েছে!", "error"); 
-    } finally { showLoader(false); }
-  }
-
-  async function deleteProduct(id) {
-    if(!isAdmin) return showToast("অনুমতি নেই!", "error");
-    if(confirm("মুছে ফেলতে চান?")) {
-        showLoader(true);
-        try {
-            await db.collection('products').doc(id).delete();
-            showToast("মুছে ফেলা হয়েছে!", "success");
-        } finally { showLoader(false); }
+        document.getElementById('loader').style.display = 'none';
+        msg("Product Added!");
     }
-  }
 
-  function filterCat(cat, btn) {
-    currentFilter = cat;
-    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    applyFilter();
-  }
-
-  function applyFilter() {
-    const data = currentFilter === 'all' ? allProducts : allProducts.filter(p => p.cat === currentFilter);
-    renderProducts(data);
-  }
-
-  function renderProducts(data) {
-    const list = document.getElementById("product-list");
-    if(!data.length) {
-        list.innerHTML = `<div style="grid-column: 1/3; text-align:center; padding:50px; opacity:0.5;">কোনো পণ্য পাওয়া যায়নি।</div>`;
-        return;
+    function render() {
+        const term = document.getElementById('sInp').value.toLowerCase();
+        const grid = document.getElementById('main-grid');
+        const filtered = prods.filter(p => (curCat === 'all' || p.cat === curCat) && p.name.toLowerCase().includes(term));
+        
+        grid.innerHTML = filtered.map(p => `
+            <div class="card">
+                <button class="del" style="display:${isAdmin?'block':'none'}" onclick="delP('${p.id}')">×</button>
+                <img src="${p.img}" onclick="openM('${p.id}')">
+                <h4>${p.name}</h4>
+                <span class="price">৳${p.price}</span>
+                <button class="buy-btn" onclick="openM('${p.id}')">${dictionary[lang].buy}</button>
+            </div>
+        `).join('');
     }
-    
-    // Using sanitize logic while rendering to prevent XSS
-    list.innerHTML = data.map(p => `
-      <div class="card">
-        <button class="delete-btn" style="display: ${isAdmin ? 'block':'none'}" onclick="deleteProduct('${p.id}')">×</button>
-        <img src="${p.img}" onclick="zoom('${p.img}','${sanitize(p.name)}', '${sanitize(p.warranty)}')" alt="${sanitize(p.name)}">
-        <span class="warranty-tag">${sanitize(p.warranty) || 'No Warranty'}</span>
-        <h4>${sanitize(p.name)}</h4>
-        <div class="price-row">
-          <span class="price">৳${p.price}</span>
-          ${p.oldPrice ? `<span class="old-price">৳${p.oldPrice}</span>` : ''}
-        </div>
-        <a class="wa-btn" href="https://wa.me/8801788350024?text=আমি এটি নিতে চাই: ${sanitize(p.name)}">
-          <i class="fab fa-whatsapp"></i> অর্ডার করুন
-        </a>
-      </div>`).join('');
-  }
 
-  function toggleTheme() { document.body.classList.toggle('light-mode'); }
-  function showLoader(show) { document.getElementById("loader").classList.toggle('active', show); }
-  
-  function showToast(msg, type) {
-    const t = document.getElementById("toast-msg");
-    t.innerText = msg;
-    t.style.borderColor = type === 'success' ? 'var(--success)' : 'var(--error)';
-    t.classList.add("show");
-    setTimeout(() => t.classList.remove("show"), 3000);
-  }
+    function openM(id) {
+        selectedP = prods.find(p => p.id === id);
+        let vidHTML = selectedP.vid ? `<iframe class="video-box" src="${selectedP.vid.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>` : '';
+        let featHTML = selectedP.features ? selectedP.features.split(',').map(f => `<div class="feature-item"><i class="fas fa-check-circle" style="color:var(--primary)"></i> ${f.trim()}</div>`).join('') : '';
+        
+        document.getElementById('mBody').innerHTML = `
+            ${vidHTML}
+            <div style="margin-top:15px;">
+                <p><b>Colors:</b> ${selectedP.colors || 'N/A'}</p>
+                <p><b>Warranty:</b> ${selectedP.warranty || 'No'}</p><br>
+                ${featHTML}
+            </div>
+        `;
+        document.getElementById('pModal').style.display = 'flex';
+    }
 
-  function clearForm() {
-    ['pname','pprice','poldprice','pimg','pwarranty'].forEach(id => document.getElementById(id).value = '');
-  }
+    function closeM() { document.getElementById('pModal').style.display = 'none'; }
 
-  function zoom(img, title, warranty) {
-    document.getElementById("zoomImg").src = img;
-    document.getElementById("zoomTitle").innerText = title;
-    document.getElementById("zoomWarranty").innerText = warranty || "No Warranty";
-    document.getElementById("modalOrderBtn").onclick = () => window.open(`https://wa.me/8801788350024?text=অর্ডার করতে চাই: ${title}`);
-    document.getElementById("zoomModal").style.display = "flex";
-  }
+    async function placeOrder() {
+        const o = {
+            item: selectedP.name,
+            customer: document.getElementById('oName').value,
+            phone: document.getElementById('oPhone').value,
+            address: document.getElementById('oAddr').value,
+            trx: document.getElementById('oTrx').value,
+            time: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        if(!o.customer || !o.phone) return alert("Fill Name/Phone!");
+        document.getElementById('loader').style.display = 'block';
+        await db.collection('orders').add(o);
+        document.getElementById('loader').style.display = 'none';
+        msg(dictionary[lang].success);
+        closeM();
+    }
 
-  function closeModal() { document.getElementById("zoomModal").style.display = "none"; }
+    async function delP(id) { if(confirm("Delete?")) await db.collection('products').doc(id).delete(); }
+    function setCategory(c, b) {
+        curCat = c;
+        document.querySelectorAll('.cat-chip').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        render();
+    }
+    function syncFilter() { render(); }
+    function msg(m) {
+        const t = document.getElementById('toast');
+        t.innerText = m; t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 3000);
+    }
+    function toggleTheme() {
+        document.body.classList.toggle('light-mode');
+        const icon = document.getElementById('tIcon');
+        icon.classList.toggle('fa-sun'); icon.classList.toggle('fa-moon');
+    }
 </script>
 </body>
 </html>
