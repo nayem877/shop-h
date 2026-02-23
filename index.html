@@ -76,7 +76,7 @@ header {
   width: 100%; padding: 12px 16px; border-radius: 10px; border: 1.5px solid var(--border);
   background: var(--card); color: var(--text); font-size: 15px; outline: none;
 }
-.cat-scroll { display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto; scrollbar-width: none; }
+.cat-scroll { display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto; scrollbar-width: none; min-height: 45px; }
 .cat-scroll::-webkit-scrollbar { display: none; }
 .cat-chip {
   background: var(--card); border: 1.5px solid var(--border); padding: 7px 16px;
@@ -273,7 +273,7 @@ const App = (() => {
         closeMenu: () => { document.getElementById('navDropdown').classList.remove('open'); document.getElementById('menuBtn').setAttribute('aria-expanded', 'false'); },
         toggleTheme: () => { state.theme = state.theme === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', state.theme); localStorage.setItem('theme', state.theme); syncUI(); },
         toggleLang: () => { state.lang = state.lang === 'bn' ? 'en' : 'bn'; localStorage.setItem('lang', state.lang); syncUI(); App.render(); },
-        checkAdmin: () => { if(state.user && state.user.email === 'nayemhossen20005@gmail.com') document.getElementById('adminPanel').classList.toggle('open'); else alert("Denied"); },
+        checkAdmin: () => { if(state.user && state.user.email === 'nayemhossen20005@gmail.com') document.getElementById('adminPanel').classList.toggle('open'); else alert("Denied! Please Login First."); },
         uploadProduct: async () => {
             const n = document.getElementById('pName').value.trim(), p = Number(document.getElementById('pPrice').value), i = document.getElementById('pImg').value.trim(), c = document.getElementById('pCat').value.trim() || 'Gadget';
             if(!n || !p || !i || n.length > 100) return toast(i18n[state.lang].fail);
