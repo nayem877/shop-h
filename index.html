@@ -1,333 +1,400 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="bn" data-lang="bn" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>THE MAX | v6.1 Masterpiece</title>
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <style>
-        :root { --primary:#2ea043; --bg:#0b1118; --card:#1c2128; --text:#ffffff; --border:#30363d; --accent:#58a6ff; }
-        .light-mode { --bg:#f0f2f5; --card:#ffffff; --text:#1c1e21; --border:#ddd; }
-        
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { overscroll-behavior-y: contain; background: var(--bg); color: var(--text); font-family: 'Hind Siliguri', sans-serif; transition: background 0.3s, color 0.3s; margin: 0; line-height: 1.6; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>THE MAX | v6.2 Stable</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ===== VARIABLES ===== */
+:root {
+  --primary: #2ea043;
+  --primary-dark: #238636;
+  --bg: #0b1118;
+  --bg2: #0d1117;
+  --card: #1c2128;
+  --card2: #22272e;
+  --text: #e6edf3;
+  --text2: #8b949e;
+  --border: #30363d;
+  --accent: #58a6ff;
+  --red: #f85149;
+  --gold: #d29922;
+  --shadow: 0 8px 32px rgba(0,0,0,0.5);
+  --radius: 14px;
+}
+[data-theme="light"] {
+  --bg: #f0f2f5;
+  --bg2: #e8eaed;
+  --card: #ffffff;
+  --card2: #f6f8fa;
+  --text: #1c1e21;
+  --text2: #57606a;
+  --border: #d0d7de;
+  --shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
 
-        /* ১ ও ২: অ্যাডভান্সড পিন্চ ও প্যান জুম (Fix 1 & 2) */
-        #smartZoom { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:100000; justify-content:center; align-items:center; overflow: hidden; touch-action: none; }
-        #zoomContainer { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-        #smartZoom img { max-width:100%; max-height:100%; object-fit:contain; transform-origin: center; will-change: transform; transition: transform 0.1s ease-out; }
-        .close-zoom { position:fixed; top:25px; right:25px; font-size:28px; color:white; cursor:pointer; z-index:100001; background: rgba(0,0,0,0.6); width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.2); }
+/* ===== RESET ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Hind Siliguri', 'DM Sans', sans-serif; background: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s; min-height: 100vh; overflow-x: hidden; line-height: 1.6; }
 
-        header { display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-bottom:2px solid var(--primary); position:sticky; top:0; background:var(--bg); z-index:1000; }
-        .logo { font-size:22px; font-weight:700; color:var(--primary); text-decoration: none; }
+/* ===== ZOOM OVERLAY ===== */
+#smartZoom {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.96); z-index: 100000;
+  justify-content: center; align-items: center;
+  overflow: hidden; touch-action: none;
+}
+#smartZoom.open { display: flex; }
+#zoomContainer { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+#zImg { max-width: 100%; max-height: 100%; object-fit: contain; transform-origin: center; will-change: transform; user-select: none; pointer-events: none; }
+.close-zoom {
+  position: fixed; top: 20px; right: 20px; font-size: 26px; color: #fff;
+  cursor: pointer; z-index: 100001; background: rgba(255,255,255,0.15);
+  width: 44px; height: 44px; border-radius: 50%; display: flex;
+  justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.3);
+  transition: background 0.2s; backdrop-filter: blur(4px);
+}
+.close-zoom:hover { background: rgba(255,255,255,0.25); }
 
-        .user-bar { display:flex; align-items:center; gap:10px; padding:10px 15px; background:rgba(46,160,67,0.08); font-size: 14px; border-bottom: 1px solid var(--border); }
-        .user-img { width:30px; height:30px; border-radius:50%; border: 1.5px solid var(--primary); }
+/* ===== HEADER ===== */
+header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; border-bottom: 2px solid var(--primary);
+  position: sticky; top: 0; background: var(--bg); z-index: 1000;
+  backdrop-filter: blur(12px);
+}
+.logo { font-size: 22px; font-weight: 700; color: var(--primary); text-decoration: none; letter-spacing: 0.05em; }
+.nav-icons { display: flex; gap: 16px; align-items: center; }
+.nav-icon-btn {
+  background: none; border: none; cursor: pointer; color: var(--text2);
+  font-size: 18px; width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  transition: color 0.2s, background 0.2s;
+}
+.nav-icon-btn:hover { color: var(--primary); background: rgba(46,160,67,0.1); }
 
-        .search-area { padding: 15px; }
-        .search-bar { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--card); color: var(--text); font-size: 15px; transition: border-color 0.3s; }
-        .search-bar:focus { border-color: var(--primary); }
+/* ===== USER BAR ===== */
+.user-bar {
+  display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+  background: rgba(46,160,67,0.07); font-size: 14px;
+  border-bottom: 1px solid var(--border); min-height: 48px; flex-wrap: wrap;
+}
+.user-img { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--primary); }
+.user-name { font-weight: 600; font-size: 14px; }
 
-        .cat-scroll { display: flex; gap: 10px; padding: 0 15px 15px; overflow-x: auto; scrollbar-width: none; }
-        .cat-chip { background: var(--card); border: 1px solid var(--border); padding: 8px 20px; border-radius: 25px; cursor: pointer; white-space: nowrap; font-size: 14px; transition: 0.2s; }
-        .cat-chip.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: 600; }
-        .cat-chip:hover:not(.active) { border-color: var(--primary); }
+/* ===== SEARCH ===== */
+.search-area { padding: 14px 16px 0; }
+.search-bar {
+  width: 100%; padding: 11px 16px; border-radius: 10px;
+  border: 1.5px solid var(--border); background: var(--card);
+  color: var(--text); font-size: 15px; font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+}
+.search-bar:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(46,160,67,0.15); }
+.search-bar::placeholder { color: var(--text2); }
 
-        .grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; padding:10px 15px; }
-        .card { background:var(--card); border-radius:15px; padding:12px; border:1px solid var(--border); display: flex; flex-direction: column; transition: transform 0.2s; position: relative; }
-        .card img { width:100%; height:150px; object-fit:cover; border-radius:12px; cursor: pointer; margin-bottom: 10px; background: #222; }
-        .card h4 { font-size: 14px; margin: 0 0 8px; height: 42px; overflow: hidden; font-weight: 600; }
-        
-        .price { color:var(--primary); font-weight:700; font-size: 17px; margin-bottom: 10px; display: block; }
-        .buy-btn { background:var(--primary); color:white; padding:12px; border-radius:10px; width: 100%; border: none; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; position: relative; overflow: hidden; }
-        .buy-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+/* ===== CATEGORY CHIPS ===== */
+.cat-scroll { display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto; scrollbar-width: none; }
+.cat-scroll::-webkit-scrollbar { display: none; }
+.cat-chip {
+  background: var(--card); border: 1.5px solid var(--border); padding: 7px 18px;
+  border-radius: 25px; cursor: pointer; white-space: nowrap; font-size: 13px;
+  font-family: inherit; font-weight: 500; transition: all 0.2s; color: var(--text);
+}
+.cat-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
+.cat-chip:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
 
-        .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; z-index:3000; padding:15px; }
-        .modal-content { background: var(--card); padding: 25px; border-radius: 20px; width: 100%; max-width: 450px; max-height: 90vh; overflow-y: auto; position: relative; transform: translateY(0); transition: transform 0.3s ease; }
-        .in { width:100%; padding:14px; margin-bottom:12px; border-radius:10px; border:1px solid var(--border); background: var(--card); color: var(--text); font-size: 15px; }
-        
-        .pay-logos { display:flex; justify-content:center; gap:20px; margin:15px 0; }
-        .pay-logos img { width:55px; cursor:pointer; border-radius:10px; border: 2.5px solid transparent; transition: 0.3s; padding: 3px; }
-        .pay-logos img.active { border-color: var(--primary); background: rgba(46,160,67,0.15); transform: translateY(-3px); }
+/* ===== LOADING SPINNER ===== */
+.loading-wrap { display: flex; justify-content: center; align-items: center; padding: 60px; }
+.spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-        #success-toast { visibility: hidden; min-width: 250px; background: var(--primary); color: white; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 10000; left: 50%; top: -100px; transform: translateX(-50%); transition: top 0.5s ease; font-weight: 600; box-shadow: 0 5px 20px rgba(0,0,0,0.4); }
-        #success-toast.show { visibility: visible; top: 30px; }
+/* ===== PRODUCT GRID ===== */
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 12px 16px; }
+.card {
+  background: var(--card); border-radius: var(--radius); padding: 12px;
+  border: 1px solid var(--border); display: flex; flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden;
+}
+.card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.card-img-wrap { position: relative; width: 100%; height: 148px; border-radius: 10px; overflow: hidden; background: var(--bg2); margin-bottom: 10px; }
+.card img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; display: block; transition: transform 0.3s; }
+.card img:hover { transform: scale(1.04); }
+.card-badge { position: absolute; top: 7px; left: 7px; background: var(--primary); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
+.card h4 { font-size: 13px; margin-bottom: 7px; font-weight: 600; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
+.card-price { color: var(--primary); font-weight: 700; font-size: 17px; margin-bottom: 10px; display: block; }
+.card-admin-del { position: absolute; top: 8px; right: 8px; background: rgba(248,81,73,0.15); border: 1px solid var(--red); color: var(--red); border-radius: 6px; padding: 2px 8px; font-size: 11px; cursor: pointer; display: none; font-family: inherit; transition: background 0.2s; }
+.card-admin-del:hover { background: rgba(248,81,73,0.3); }
+body.is-admin .card-admin-del { display: block; }
+.empty-state { grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text2); }
+.empty-state i { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
 
-        @media (max-width: 330px) { .grid { grid-template-columns: 1fr; } }
-    </style>
+/* ===== BUTTONS ===== */
+.buy-btn {
+  background: var(--primary); color: #fff; padding: 11px 16px;
+  border-radius: 10px; width: 100%; border: none; font-weight: 700;
+  cursor: pointer; font-size: 14px; transition: background 0.2s, transform 0.1s;
+  font-family: inherit; letter-spacing: 0.02em;
+}
+.buy-btn:hover:not(:disabled) { background: var(--primary-dark); }
+.buy-btn:active:not(:disabled) { transform: scale(0.98); }
+.buy-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn-secondary { background: var(--card2); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover:not(:disabled) { background: var(--border); }
+.btn-danger { background: rgba(248,81,73,0.15); color: var(--red); border: 1px solid var(--red); }
+.btn-danger:hover:not(:disabled) { background: rgba(248,81,73,0.3); }
+
+/* ===== ADMIN PANEL ===== */
+.admin-panel {
+  display: none; margin: 12px 16px; padding: 20px;
+  background: var(--card); border: 2px solid var(--primary);
+  border-radius: var(--radius);
+}
+.admin-panel h3 { margin-bottom: 16px; font-size: 18px; color: var(--primary); }
+.admin-panel.open { display: block; }
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.admin-actions { display: flex; gap: 10px; margin-top: 14px; }
+
+/* ===== FORM INPUTS ===== */
+.in {
+  width: 100%; padding: 12px 14px; border-radius: 10px;
+  border: 1.5px solid var(--border); background: var(--bg);
+  color: var(--text); font-size: 14px; font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s; outline: none; margin-bottom: 10px;
+}
+.in:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(46,160,67,0.12); }
+.in::placeholder { color: var(--text2); }
+select.in { cursor: pointer; }
+.in-label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* ===== MODAL ===== */
+.modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8); justify-content: center;
+  align-items: flex-end; z-index: 3000; padding: 0;
+}
+.modal.open { display: flex; }
+.modal-content {
+  background: var(--card); padding: 24px; border-radius: 20px 20px 0 0;
+  width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+.modal-product-info { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 16px; font-size: 14px; }
+.modal-product-info strong { color: var(--primary); }
+
+/* ===== PAYMENT OPTIONS ===== */
+.pay-title { font-size: 13px; color: var(--text2); font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+.pay-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.pay-opt {
+  border: 2px solid var(--border); border-radius: 12px; padding: 14px 10px;
+  cursor: pointer; text-align: center; background: var(--bg2);
+  transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.pay-opt img { width: 44px; height: 44px; object-fit: contain; border-radius: 8px; }
+.pay-opt span { font-size: 13px; font-weight: 700; }
+.pay-opt.active { border-color: var(--primary); background: rgba(46,160,67,0.08); }
+.pay-opt:hover:not(.active) { border-color: var(--accent); }
+
+/* ===== TOAST ===== */
+#toast {
+  position: fixed; left: 50%; top: -80px; transform: translateX(-50%);
+  background: var(--primary); color: #fff; padding: 13px 24px;
+  border-radius: 12px; font-weight: 700; font-size: 14px;
+  z-index: 99999; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  transition: top 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  white-space: nowrap; font-family: inherit; pointer-events: none;
+}
+#toast.error { background: var(--red); }
+#toast.show { top: 24px; }
+
+/* ===== FOOTER ===== */
+footer {
+  padding: 32px 16px; text-align: center;
+  border-top: 1px solid var(--border); margin-top: 24px;
+  background: var(--bg2);
+}
+.footer-socials { display: flex; justify-content: center; gap: 20px; margin-bottom: 14px; }
+.footer-icon { color: var(--text2); font-size: 24px; transition: color 0.2s, transform 0.2s; text-decoration: none; }
+.footer-icon:hover { color: var(--primary); transform: scale(1.15); }
+.footer-copy { font-size: 12px; color: var(--text2); }
+
+/* ===== UTILITIES ===== */
+.mt-10 { margin-top: 10px; }
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+/* ===== RESPONSIVE ===== */
+@media (min-width: 600px) { .modal { align-items: center; padding: 16px; } .modal-content { border-radius: 20px; } }
+@media (max-width: 360px) { .grid { grid-template-columns: 1fr; } }
+@media (min-width: 768px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1024px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+</style>
 </head>
-<body class="dark-mode">
+<body>
 
-<div id="success-toast" role="alert" aria-live="assertive">অর্ডার সফল হয়েছে!</div>
+<!-- TOAST -->
+<div id="toast" role="alert" aria-live="assertive"></div>
 
-<div id="smartZoom" aria-hidden="true">
-    <span class="close-zoom" onclick="StoreApp.closeZoom()" aria-label="Close image zoom" tabindex="0" onkeypress="if(event.key==='Enter') StoreApp.closeZoom()">&times;</span>
-    <div id="zoomContainer">
-        <img id="zImg" src="" alt="পণ্য বিস্তারিত জুম">
-    </div>
+<!-- ZOOM OVERLAY -->
+<div id="smartZoom" aria-modal="true" role="dialog" aria-label="Image zoom">
+  <button class="close-zoom" onclick="App.closeZoom()" aria-label="Close zoom">&times;</button>
+  <div id="zoomContainer">
+    <img id="zImg" src="" alt="\u09aa\u09a3\u09cd\u09af\u09c7\u09b0 \u099b\u09ac\u09bf">
+  </div>
 </div>
 
+<!-- HEADER -->
 <header>
-    <a href="#" class="logo">THE MAX</a>
-    <div class="nav-icons" style="display: flex; gap: 18px;">
-        <i class="fas fa-moon" style="cursor:pointer; font-size: 20px;" onclick="StoreApp.toggleTheme()" id="tIcon" aria-label="Toggle dark mode" role="button" tabindex="0"></i>
-        <i class="fas fa-user-shield" style="cursor:pointer; font-size: 20px;" onclick="StoreApp.checkAdmin()" aria-label="Open admin panel" role="button" tabindex="0"></i>
-    </div>
+  <a href="#" class="logo" aria-label="THE MAX Home">THE MAX</a>
+  <div class="nav-icons">
+    <button class="nav-icon-btn" id="langBtn" onclick="App.toggleLang()" aria-label="Switch language" title="Language">
+      <i class="fas fa-globe"></i>
+    </button>
+    <button class="nav-icon-btn" id="themeBtn" onclick="App.toggleTheme()" aria-label="Toggle theme" title="Theme">
+      <i class="fas fa-moon" id="themeIcon"></i>
+    </button>
+    <button class="nav-icon-btn" id="adminBtn" onclick="App.checkAdmin()" aria-label="Admin panel" title="Admin">
+      <i class="fas fa-user-shield"></i>
+    </button>
+  </div>
 </header>
 
+<!-- USER BAR -->
 <div class="user-bar" id="userBar"></div>
 
+<!-- ADMIN PANEL -->
+<div class="admin-panel" id="adminPanel">
+  <h3><i class="fas fa-boxes" style="margin-right:8px"></i><span data-t="adminTitle">\u09aa\u09a3\u09cd\u09af \u09ae\u09cd\u09af\u09be\u09a8\u09c7\u099c\u09ae\u09c7\u09a8\u09cd\u099f</span></h3>
+  <div class="admin-grid">
+    <div>
+      <label class="in-label" data-t="labelName">\u09aa\u09a3\u09cd\u09af\u09c7\u09b0 \u09a8\u09be\u09ae</label>
+      <input type="text" id="pName" class="in" placeholder="Samsung Watch Pro" maxlength="80">
+    </div>
+    <div>
+      <label class="in-label" data-t="labelPrice">\u09ae\u09c2\u09b2\u09cd\u09af (\u09f3)</label>
+      <input type="number" id="pPrice" class="in" placeholder="1999" min="1">
+    </div>
+    <div>
+      <label class="in-label" data-t="labelImg">\u099b\u09ac\u09bf\u09b0 \u09b2\u09bf\u0999\u09cd\u0995</label>
+      <input type="url" id="pImg" class="in" placeholder="https://example.com/img.jpg">
+    </div>
+    <div>
+      <label class="in-label" data-t="labelCat">\u0995\u09cd\u09af\u09be\u099f\u09be\u0997\u09b0\u09bf</label>
+      <input type="text" id="pCatInput" class="in" placeholder="Watch / Headphone / Gadget">
+    </div>
+  </div>
+  <div style="grid-column:1/-1">
+    <label class="in-label" data-t="labelDesc">\u09ac\u09bf\u09ac\u09b0\u09a3 (\u0990\u099a\u09cd\u099b\u09bf\u0995)</label>
+    <input type="text" id="pDesc" class="in" placeholder="\u09aa\u09a3\u09cd\u09af\u09c7\u09b0 \u09b8\u0982\u0995\u09cd\u09b7\u09bf\u09aa\u09cd\u09a4 \u09ac\u09bf\u09ac\u09b0\u09a3..." maxlength="150">
+  </div>
+  <div class="admin-actions">
+    <button class="buy-btn" id="saveBtn" onclick="App.uploadProduct()">
+      <i class="fas fa-save" style="margin-right:6px"></i><span data-t="btnSave">\u09b8\u0982\u09b0\u0995\u09cd\u09b7\u09a3 \u0995\u09b0\u09c1\u09a8</span>
+    </button>
+    <button class="buy-btn btn-secondary" onclick="App.closeAdmin()">
+      <span data-t="btnCancel">\u09ac\u09be\u09a4\u09bf\u09b2</span>
+    </button>
+  </div>
+</div>
+
+<!-- SEARCH -->
 <div class="search-area">
-    <input type="text" id="sInp" class="search-bar" placeholder="পণ্য খুঁজুন (e.g. T500 Ultra)..." oninput="StoreApp.render()" aria-label="Search products">
+  <input type="search" id="sInp" class="search-bar" placeholder="\u09aa\u09a3\u09cd\u09af \u0996\u09c1\u0981\u099c\u09c1\u09a8..." oninput="App.render()" aria-label="Search products" autocomplete="off">
 </div>
 
-<div class="cat-scroll" id="cat-list" role="tablist"></div>
+<!-- CATEGORIES -->
+<div class="cat-scroll" id="catList" role="tablist" aria-label="Product categories"></div>
 
-<div id="admin-panel" style="display:none; padding:20px; background:var(--card); border:2px solid var(--primary); margin:15px; border-radius:15px;">
-    <h3 style="margin-top:0">নতুন পণ্য যুক্ত করুন</h3>
-    <input type="text" id="pName" class="in" placeholder="পণ্যের নাম *">
-    <input type="number" id="pPrice" class="in" placeholder="দাম (অবশ্যই ০-এর বেশি) *">
-    <input type="text" id="pImg" class="in" placeholder="ইমেজ লিঙ্ক (URL) *">
-    <input type="text" id="pCatInput" class="in" placeholder="ক্যাটাগরি (e.g. Watch)">
-    <button class="buy-btn" id="upBtn" onclick="StoreApp.uploadProduct()">পণ্য সেভ করুন</button>
-    <button class="buy-btn" style="background:#444; margin-top:10px" onclick="StoreApp.closeAdmin()">বাতিল</button>
+<!-- PRODUCT GRID -->
+<div id="mainGrid">
+  <div class="loading-wrap"><div class="spinner"></div></div>
 </div>
 
-<div class="grid" id="main-grid"></div>
+<!-- ORDER MODAL -->
+<div class="modal" id="orderModal" role="dialog" aria-modal="true" aria-labelledby="modalHeading">
+  <div class="modal-content" id="modalContent">
+    <h3 class="modal-title" id="modalHeading" data-t="orderTitle">\u0985\u09b0\u09cd\u09a1\u09be\u09b0 \u0995\u09b0\u09c1\u09a8</h3>
+    <div class="modal-product-info" id="mProductInfo"></div>
 
-<div class="modal" id="pModal" aria-modal="true" role="dialog" onkeydown="if(event.key==='Escape') StoreApp.closeM()">
-    <div class="modal-content" id="modalContent">
-        <h3 style="margin-top:0">অর্ডার সম্পন্ন করুন</h3>
-        <div id="mBody" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:15px; font-size:14px;"></div>
-        
-        <p style="font-size:13px; color:var(--primary); margin-bottom: 8px;">পেমেন্ট মাধ্যম সিলেক্ট করুন:</p>
-        <div class="pay-logos">
-            <img src="https://img.icons8.com/color/48/bkash.png" id="bk" onclick="StoreApp.selectPay('Bkash')" alt="বিকাশ">
-            <img src="https://img.icons8.com/color/48/nagad.png" id="ng" onclick="StoreApp.selectPay('Nagad')" alt="নগদ">
-        </div>
-
-        <input type="text" id="oName" class="in" placeholder="আপনার নাম *">
-        <input type="text" id="oPhone" class="in" placeholder="মোবাইল নম্বর (১১ ডিজিট) *">
-        <input type="text" id="oTrx" class="in" placeholder="Transaction ID (TrxID) *">
-        
-        <button class="buy-btn" id="confirmBtn" onclick="StoreApp.placeOrder()">অর্ডার কনফার্ম করুন</button>
-        <button class="buy-btn" style="background:#444; margin-top:10px" onclick="StoreApp.closeM()">বন্ধ করুন</button>
+    <div class="pay-title" data-t="payTitle">\u09aa\u09c7\u09ae\u09c7\u09a8\u09cd\u099f \u09aa\u09a6\u09cd\u09a7\u09a4\u09bf \u09ac\u09c7\u099b\u09c7 \u09a8\u09bf\u09a8</div>
+    <div class="pay-options">
+      <div class="pay-opt" id="payBkash" onclick="App.selectPay('Bkash')" role="button" tabindex="0" aria-label="bKash payment">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Bkash_Logo.png/320px-Bkash_Logo.png" alt="bKash" onerror="this.src='https://via.placeholder.com/44?text=bK'">
+        <span style="color:#e2136e">bKash</span>
+      </div>
+      <div class="pay-opt" id="payNagad" onclick="App.selectPay('Nagad')" role="button" tabindex="0" aria-label="Nagad payment">
+        <img src="https://upload.wikimedia.org/wikipedia/en/9/96/Nagad.png" alt="Nagad" onerror="this.src='https://via.placeholder.com/44?text=Ng'">
+        <span style="color:#f7941d">Nagad</span>
+      </div>
     </div>
+
+    <label class="in-label" data-t="labelCustName">\u0986\u09aa\u09a8\u09be\u09b0 \u09a8\u09be\u09ae</label>
+    <input type="text" id="oName" class="in" placeholder="\u0986\u09aa\u09a8\u09be\u09b0 \u09aa\u09c2\u09b0\u09cd\u09a3 \u09a8\u09be\u09ae" autocomplete="name">
+    <label class="in-label" data-t="labelPhone">\u09ae\u09cb\u09ac\u09be\u0987\u09b2 \u09a8\u09ae\u09cd\u09ac\u09b0</label>
+    <input type="tel" id="oPhone" class="in" placeholder="01XXXXXXXXX" maxlength="11" autocomplete="tel">
+    <label class="in-label" data-t="labelAddr">\u09a0\u09bf\u0995\u09be\u09a8\u09be</label>
+    <input type="text" id="oAddr" class="in" placeholder="\u099c\u09c7\u09b2\u09be, \u0989\u09aa\u099c\u09c7\u09b2\u09be">
+    <label class="in-label" data-t="labelTrx">\u099f\u09cd\u09b0\u09be\u09a8\u099c\u09c7\u0995\u09b6\u09a8 \u0986\u0987\u09a1\u09bf (TrxID)</label>
+    <input type="text" id="oTrx" class="in" placeholder="TrxID / Reference" maxlength="30">
+
+    <button class="buy-btn" id="confirmBtn" onclick="App.placeOrder()">
+      <i class="fas fa-check-circle" style="margin-right:6px"></i>
+      <span data-t="btnConfirm">\u0985\u09b0\u09cd\u09a1\u09be\u09b0 \u0995\u09a8\u09ab\u09be\u09b0\u09cd\u09ae \u0995\u09b0\u09c1\u09a8</span>
+    </button>
+    <button class="buy-btn btn-secondary mt-10" onclick="App.closeModal()">
+      <span data-t="btnClose">\u09ac\u09a8\u09cd\u09a7 \u0995\u09b0\u09c1\u09a8</span>
+    </button>
+  </div>
 </div>
 
-<footer style="padding: 30px; text-align: center; border-top: 1px solid var(--border); margin-top: 20px;">
-    <div class="socials" style="display: flex; justify-content: center; gap: 25px; margin-bottom: 12px;">
-        <a href="https://wa.me/8801788350024" target="_blank" style="color:var(--primary); font-size: 26px;" aria-label="WhatsApp Us"><i class="fab fa-whatsapp"></i></a>
-        <a href="https://www.facebook.com/share/17ZHe2aFT1/" target="_blank" style="color:var(--primary); font-size: 26px;" aria-label="Follow us on Facebook"><i class="fab fa-facebook"></i></a>
-    </div>
-    <p style="font-size: 13px; opacity: 0.7;">© 2026 THE MAX - v6.1 Masterpiece | Developed by Nayem Hossen</p>
+<!-- FOOTER -->
+<footer>
+  <div class="footer-socials">
+    <a href="https://wa.me/8801788350024" target="_blank" rel="noopener" class="footer-icon" aria-label="WhatsApp">
+      <i class="fab fa-whatsapp"></i>
+    </a>
+    <a href="https://www.facebook.com/share/17ZHe2aFT1/" target="_blank" rel="noopener" class="footer-icon" aria-label="Facebook">
+      <i class="fab fa-facebook"></i>
+    </a>
+    <a href="https://www.youtube.com/@themax" target="_blank" rel="noopener" class="footer-icon" aria-label="YouTube">
+      <i class="fab fa-youtube"></i>
+    </a>
+    <a href="mailto:nayemhossen20005@gmail.com" class="footer-icon" aria-label="Email">
+      <i class="fas fa-envelope"></i>
+    </a>
+  </div>
+  <p class="footer-copy">\u00a9 2026 THE MAX \u2014 v6.2 Stable | Developed by Nayem Hossen</p>
 </footer>
 
+<!-- FIREBASE COMPAT SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
 <script>
-    const StoreApp = (function() {
-        const WA_NUM = "8801788350024";
-        const fbConfig = {
-            apiKey: "AIzaSyAoZzONz8I2W70_b4oR_7cGxbQCmDaipWg",
-            authDomain: "shop-h-215df.firebaseapp.com",
-            projectId: "shop-h-215df",
-            appId: "1:60483176788:web:cdadf8c99fccb3d20620c1"
-        };
-        firebase.initializeApp(fbConfig);
-        const db = firebase.firestore(), auth = firebase.auth();
+'use strict';
 
-        // State Management (Fix 5: Race conditions)
-        let state = {
-            prods: [],
-            curCat: localStorage.getItem('maxCat') || 'all',
-            user: null,
-            selectedP: null,
-            payMethod: '',
-            isLoading: false,
-            zoom: { scale: 1, x: 0, y: 0, dist: 0, lastX: 0, lastY: 0 }
-        };
+/* ======================================================
+   THE MAX v6.2 \u2014 STABLE PRODUCTION BUILD
+   Author: Nayem Hossen | Firebase: shop-h-215df
+   ====================================================== */
 
-        // ৪: উন্নত স্যানিটাইজার ও ভ্যালিডেশন (Fix 4)
-        const sanitize = (str, len = 50) => str.replace(/[^\w\s\u0980-\u09FF-]/gi, '').substring(0, len).trim();
+const App = (function () {
 
-        const toast = (msg) => {
-            const el = document.getElementById("success-toast");
-            el.innerText = msg;
-            el.classList.add("show");
-            setTimeout(() => el.classList.remove("show"), 3000);
-        };
+  /* \u2500\u2500 CONSTANTS \u2500\u2500 */
+  const WA_NUM    = '8801788350024';
+  const ADMIN_EMAIL = 'nayemhossen20005@gmail.com';
+  const FB_CONFIG = {
+    apiKey:            'AIzaSyAoZzONz8I2W70_b4oR_7cGxbQCmDaipWg',
+    authDomain:        'shop-h-215df.firebaseapp.com',
+    projectId:         'shop-h-215df',
+    storageBucket:     'shop-h-215df.firebasestorage.app',
+    messagingSenderId: '60483176788',
+    appId:             '1:60483176788:web:cdadf8c99fccb3d20620c1'
+  };
 
-        // ১: মাল্টি-টাচ পিন্চ জুম হ্যান্ডলিং (Fix 1: GestureEvent Logic)
-        const initZoom = () => {
-            const container = document.getElementById('zoomContainer');
-            const img = document.getElementById('zImg');
-
-            container.addEventListener('touchstart', (e) => {
-                if (e.touches.length === 2) {
-                    state.zoom.dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                } else if (e.touches.length === 1) {
-                    state.zoom.lastX = e.touches[0].pageX - state.zoom.x;
-                    state.zoom.lastY = e.touches[0].pageY - state.zoom.y;
-                }
-            });
-
-            container.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                if (e.touches.length === 2) {
-                    let newDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                    let zoomDelta = newDist / state.zoom.dist;
-                    state.zoom.scale = Math.min(Math.max(1, state.zoom.scale * zoomDelta), 4);
-                    state.zoom.dist = newDist;
-                } else if (e.touches.length === 1 && state.zoom.scale > 1) {
-                    state.zoom.x = e.touches[0].pageX - state.zoom.lastX;
-                    state.zoom.y = e.touches[0].pageY - state.zoom.lastY;
-                }
-                img.style.transform = `translate(${state.zoom.x}px, ${state.zoom.y}px) scale(${state.zoom.scale})`;
-            }, { passive: false });
-        };
-
-        return {
-            init: () => {
-                initZoom();
-                const theme = localStorage.getItem('maxTheme') || 'dark-mode';
-                document.body.className = theme;
-                document.getElementById('tIcon').className = theme === 'light-mode' ? 'fas fa-sun' : 'fas fa-moon';
-
-                auth.onAuthStateChanged(u => {
-                    state.user = u;
-                    const bar = document.getElementById('userBar');
-                    if(u) {
-                        bar.innerHTML = `<img src="${u.photoURL}" class="user-img" alt="Profile"> <span>${u.displayName}</span> <button onclick="StoreApp.logout()" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:12px; margin-left:10px;">Logout</button>`;
-                        document.getElementById('oName').value = u.displayName;
-                    } else {
-                        bar.innerHTML = `<button class="buy-btn" style="width:auto; padding:5px 15px; font-size:12px;" onclick="StoreApp.login()">Google দিয়ে লগইন</button>`;
-                    }
-                    db.collection('products').orderBy('createdAt', 'desc').onSnapshot(s => {
-                        state.prods = s.docs.map(d => ({id: d.id, ...d.data()}));
-                        StoreApp.render();
-                    });
-                });
-            },
-
-            login: () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()),
-            logout: () => auth.signOut(),
-
-            openZoom: (url) => {
-                state.zoom = { scale: 1, x: 0, y: 0, dist: 0, lastX: 0, lastY: 0 };
-                document.getElementById('zImg').src = url;
-                document.getElementById('zImg').style.transform = `scale(1)`;
-                document.getElementById('smartZoom').style.display = 'flex';
-                document.getElementById('smartZoom').setAttribute('aria-hidden', 'false');
-            },
-            closeZoom: () => {
-                document.getElementById('smartZoom').style.display = 'none';
-                document.getElementById('smartZoom').setAttribute('aria-hidden', 'true');
-            },
-
-            checkAdmin: () => {
-                if(state.user && state.user.email === "nayemhossen20005@gmail.com") document.getElementById('admin-panel').style.display = 'block';
-                else alert("আপনি অ্যাডমিন নন!");
-            },
-            closeAdmin: () => document.getElementById('admin-panel').style.display = 'none',
-
-            uploadProduct: async () => {
-                if(state.isLoading) return;
-                const name = document.getElementById('pName').value.trim();
-                const price = parseFloat(document.getElementById('pPrice').value);
-                const img = document.getElementById('pImg').value.trim();
-                const cat = sanitize(document.getElementById('pCatInput').value) || 'Gadget';
-
-                if(!name || isNaN(price) || price <= 0 || !img) return alert("তথ্য সঠিক দিন!");
-
-                state.isLoading = true;
-                const btn = document.getElementById('upBtn');
-                btn.disabled = true; btn.innerText = "সেভ হচ্ছে...";
-
-                await db.collection('products').add({ name, price, img, cat, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-                toast("পণ্যটি যুক্ত হয়েছে!");
-                state.isLoading = false; btn.disabled = false; btn.innerText = "পণ্য সেভ করুন";
-                StoreApp.closeAdmin();
-            },
-
-            selectPay: (method) => {
-                state.payMethod = method;
-                document.getElementById('bk').className = method === 'Bkash' ? 'active' : '';
-                document.getElementById('ng').className = method === 'Nagad' ? 'active' : '';
-            },
-
-            openM: (id) => {
-                state.selectedP = state.prods.find(p => p.id === id);
-                document.getElementById('mBody').innerHTML = `<strong>পণ্য:</strong> ${state.selectedP.name} <br> <strong>মূল্য:</strong> ৳${state.selectedP.price}`;
-                document.getElementById('pModal').style.display = 'flex';
-                document.getElementById('modalContent').style.transform = 'translateY(0)';
-            },
-
-            closeM: () => {
-                document.getElementById('modalContent').style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    document.getElementById('pModal').style.display = 'none';
-                    state.payMethod = ''; // ২ ও ৩: রিসেট পে মেথড (Fix 2 & 3)
-                    document.getElementById('bk').className = '';
-                    document.getElementById('ng').className = '';
-                }, 200);
-            },
-
-            placeOrder: async () => {
-                if(state.isLoading) return; // ৭: ডাবল ক্লিক সেফটি (Fix 7)
-                const name = document.getElementById('oName').value.trim();
-                const phone = document.getElementById('oPhone').value.trim();
-                const trx = sanitize(document.getElementById('oTrx').value, 20);
-
-                if(name.length < 3 || !/^01[3-9]\d{8}$/.test(phone) || !state.payMethod || !trx) return alert("অনুগ্রহ করে সঠিক তথ্য দিন!");
-
-                state.isLoading = true;
-                const btn = document.getElementById('confirmBtn');
-                btn.disabled = true; btn.innerText = "অর্ডার হচ্ছে...";
-
-                try {
-                    await db.collection('orders').add({
-                        item: state.selectedP.name, customer: name, phone, 
-                        method: state.payMethod, trx, userId: state.user ? state.user.uid : 'Guest',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    toast("ধন্যবাদ! আপনার অর্ডার গ্রহণ করা হয়েছে।");
-                    window.open(`https://wa.me/${WA_NUM}?text=নতুন অর্ডার!%0Aপণ্য: ${state.selectedP.name}%0ATrxID: ${trx}`, '_blank');
-                    StoreApp.closeM();
-                } catch(e) { alert("দুঃখিত, পুনরায় চেষ্টা করুন।"); }
-                state.isLoading = false; btn.disabled = false; btn.innerText = "অর্ডার কনফার্ম করুন";
-            },
-
-            render: () => {
-                const uniqueCats = ['all', ...new Set(state.prods.map(p => p.cat))];
-                document.getElementById('cat-list').innerHTML = uniqueCats.map(c => `<div class="cat-chip ${state.curCat === c ? 'active' : ''}" onclick="StoreApp.setCat('${c}')" role="tab">${c}</div>`).join('');
-                
-                const term = document.getElementById('sInp').value.toLowerCase();
-                const filtered = state.prods.filter(p => (state.curCat === 'all' || p.cat === state.curCat) && p.name.toLowerCase().includes(term));
-                
-                document.getElementById('main-grid').innerHTML = filtered.map(p => `
-                    <div class="card">
-                        <img src="${p.img}" onclick="StoreApp.openZoom('${p.img}')" alt="${p.name}" loading="lazy"> <h4>${p.name}</h4>
-                        <span class="price">৳${p.price}</span>
-                        <button class="buy-btn" onclick="StoreApp.openM('${p.id}')">অর্ডার দিন</button>
-                    </div>`).join('');
-            },
-
-            setCat: (c) => { state.curCat = c; localStorage.setItem('maxCat', c); StoreApp.render(); },
-            toggleTheme: () => {
-                const newT = document.body.classList.contains('dark-mode') ? 'light-mode' : 'dark-mode';
-                localStorage.setItem('maxTheme', newT);
-                document.body.className = newT;
-                document.getElementById('tIcon').className = newT === 'light-mode' ? 'fas fa-sun' : 'fas fa-moon';
-            }
-        };
-    })();
-
-    StoreApp.init();
-</script>
-</body>
-</html>
+  /* \u2500\u2500 TRANSLATIONS \
