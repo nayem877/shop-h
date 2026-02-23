@@ -348,9 +348,16 @@ const TheMax = (() => {
                             <span class="new-p">৳${p.price}</span>
                         </div>
                         <div class="meta">
-                                       ">
-                            <span onclick="this.style.color='var(--primary)'"><i class="fas fa-heart"></i> Like</span>
-                            <span><i class="fas fa-comment"></i> Comment</span>
+                                 ">
+                            <span onclick="TheMax.toggleLike('${p.id}')" style="cursor:pointer">
+                                <i class="fas fa-heart" id="ic-l-${p.id}"></i> <small id="ln-${p.id}">${p.likes || 0}</small>
+                            </span>
+                            <span onclick="TheMax.addComment('${p.id}')" style="cursor:pointer">
+                                <i class="fas fa-comment"></i> <small id="cn-${p.id}">${p.comments || 0}</small>
+                            </span>
+                        </div>
+                        <div style="margin-bottom:10px; display:flex; gap:5px; height:20px;">
+                            ${p.colors ? p.colors.split(',').map(c => `<div style="width:16px; height:16px; border-radius:50%; background:${c.trim()}; border:1px solid var(--border);"></div>`).join('') : ''}
                         </div>
                         <button class="order-btn" onclick="TheMax.openOrder('${p.id}')">${state.lang==='bn'?'অর্ডার দিন':'Order Now'}</button>
                     </div>
@@ -367,9 +374,47 @@ const TheMax = (() => {
             });
         },
 
+        toggleLike: async (id) => {
+            try {
+                const pRef = db.collection('products').doc(id);
+                const doc = await pRef.get();
+                const newLikes = (doc.data().likes || 0) + 1;
+                await pRef.update({ likes: newLikes });
+                document.getElementById(`ln-${id}`).innerText = newLikes;
+                msg("লাইক দেওয়া হয়েছে!");
+            } catch(e) { msg("লাইক দিতে সমস্যা হয়েছে!"); }
+        },
+
+        addComment: async (id) => {
+            let c = prompt("আপনার নাম ও মন্তব্য লিখুন (উদা: রহিম - দারুণ পণ্য):");
+            if(c) {
+                try {
+                    const pRef = db.collection('products').doc(id);
+                    const doc = await pRef.get();
+                    const currentComments = doc.data().allComments || [];
+                    currentComments.push(c);
+                    await pRef.update({ 
+                        allComments: currentComments,
+                        comments: currentComments.length 
+                    });
+                    document.getElementById(`cn-${id}`).innerText = currentComments.length;
+                    msg("মন্তব্য জমা হয়েছে!");
+                } catch(e) { msg("সমস্যা হয়েছে!"); }
+            }
+        },
+
         zoomImg: (src) => {
+            const product = state.products.find(p => p.img === src);
             document.getElementById('zoomImg').src = src;
+            const commentBox = document.createElement('div');
+            commentBox.id = "commentDisplay";
+            commentBox.style = "padding:15px; color:white; background:rgba(0,0,0,0.8); max-height:150px; overflow-y:auto; font-size:12px;";
+            commentBox.innerHTML = "<b>মন্তব্যসমূহ:</b><br>" + (product.allComments ? product.allComments.join('<br>') : "কোন মন্তব্য নেই");
+            
             const lb = document.getElementById('lightbox');
+            if(!document.getElementById('commentDisplay')) lb.appendChild(commentBox);
+            else document.getElementById('commentDisplay').innerHTML = commentBox.innerHTML;
+            
             lb.style.display = 'flex';
             setTimeout(() => lb.classList.add('show'), 10);
         },
@@ -395,36 +440,34 @@ const TheMax = (() => {
                 img: document.getElementById('inImg').value,
                 cat: document.getElementById('inCat').value || 'General',
                 video: document.getElementById('inVid').value,
+                colors: document.getElementById('inColors') ? document.getElementById('inColors').value : "",
                 desc: document.getElementById('inDesc').value,
+                likes: 0, comments: 0, allComments: [],
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
             if(!data.name || !data.price || !data.img) return msg("প্রয়োজনীয় তথ্য দিন!");
             await db.collection('products').add(data);
             msg("পণ্য সেভ হয়েছে!");
-            ['inName','inPrice','inOldPrice','inImg','inCat','inVid','inDesc'].forEach(i => document.getElementById(i).value = "");
+            ['inName','inPrice','inOldPrice','inImg','inCat','inVid','inColors','inDesc'].forEach(i => {
+                let el = document.getElementById(i); if(el) el.value = "";
+            });
         },
 
         openOrder: (id) => {
             state.selP = state.products.find(x => x.id === id);
             document.getElementById('orderSummary').innerHTML = `
                 <img src="${state.selP.img}" style="width:60px; height:60px; border-radius:8px; float:left; margin-right:12px;">
-                <b>${state.selP.name}</b><br>
-                মূল্য: ৳${state.selP.price}<br>
-                <small>${state.selP.desc || 'No description available'}</small>
+                <b>${state.selP.name}</b><br>মূল্য: ৳${state.selP.price}
             `;
             TheMax.toggleModal('orderModal', true);
         },
 
         submitOrder: async () => {
-            const n = document.getElementById('cN').value, p = document.getElementById('cP').value, a = document.getElementById('cA').value, t = document.getElementById('cT').value;
-            if(!n || !p || !a) return msg("আপনার তথ্য দিন!");
-            
-            await db.collection('orders').add({
-                pName: state.selP.name, customer: n, phone: p, address: a, trx: t, createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            
-            msg("অর্ডার সফল হয়েছে!");
-            window.open(`https://wa.me/8801788350024?text=${encodeURIComponent("নতুন অর্ডার:\nপণ্য: "+state.selP.name+"\nমূল্য: "+state.selP.price+"\nনাম: "+n+"\nঠিকানা: "+a)}`, '_blank');
+            const n = document.getElementById('cN').value, p = document.getElementById('cP').value, a = document.getElementById('cA').value;
+            if(!n || !p || !a) return msg("তথ্য দিন!");
+            await db.collection('orders').add({ pName: state.selP.name, customer: n, phone: p, address: a, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+            msg("অর্ডার সফল!");
+            window.open(`https://wa.me/8801788350024?text=Order:${state.selP.name}`, '_blank');
             TheMax.toggleModal('orderModal', false);
         },
 
@@ -441,8 +484,8 @@ const TheMax = (() => {
             db.collection('orders').orderBy('createdAt', 'desc').onSnapshot(snap => {
                 document.getElementById('orderListView').innerHTML = snap.docs.map(doc => {
                     const o = doc.data();
-                    return `<div style="padding:15px; border-bottom:1px solid var(--border); font-size:13px; line-height:1.5;"><b>${o.pName}</b><br>কাস্টমার: ${o.customer} (${o.phone})<br>ঠিকানা: ${o.address}</div>`;
-                }).join('') || "কোন অর্ডার পাওয়া যায়নি!";
+                    return `<div style="padding:15px; border-bottom:1px solid var(--border); font-size:13px;"><b>${o.pName}</b><br>${o.customer} (${o.phone})</div>`;
+                }).join('') || "অর্ডার নেই!";
             });
         },
 
@@ -455,14 +498,34 @@ const TheMax = (() => {
             `).join('');
         },
 
-        delProd: async (id) => { if(confirm("পণ্যটি ডিলিট করতে চান?")) await db.collection('products').doc(id).delete(); }
+        delProd: async (id) => { 
+            if(confirm("পণ্যটি ডিলিট করতে চান?")) {
+                try {
+                    await db.collection('products').doc(id).delete();
+                    msg("পণ্য ডিলিট হয়েছে!");
+                    state.products = state.products.filter(item => item.id !== id);
+                    TheMax.renderManage();
+                    TheMax.render();
+                } catch(error) { 
+                    msg("ডিলিট করতে সমস্যা হয়েছে!"); 
+                    console.log(error);
+                }
+            }
+        }
     };
 })();
 
 window.addEventListener("DOMContentLoaded", TheMax.init);
-
-// Force Admin Button to show for easy access
-setTimeout(() => { document.getElementById('adminPanelBtn').style.display = 'flex'; }, 2000);
+setTimeout(() => { 
+    document.getElementById('adminPanelBtn').style.display = 'flex'; 
+    const catField = document.getElementById('inCat');
+    if(catField && !document.getElementById('inColors')) {
+        const colorIn = document.createElement('input');
+        colorIn.id = 'inColors'; colorIn.className = 'field';
+        colorIn.placeholder = 'রঙ (যেমন: red, blue, green)';
+        catField.parentNode.insertBefore(colorIn, catField.nextSibling);
+    }
+}, 2000);
 </script>
 </body>
 </html>
