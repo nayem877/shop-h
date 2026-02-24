@@ -341,10 +341,16 @@ const TheMax = (() => {
             state.products.filter(p => (state.cat==='All'||p.cat===state.cat) && p.name.toLowerCase().includes(term)).forEach(p => {
                 pBox.innerHTML += `
                     <div class="card">
-                      <div class="card">
+                                    <div class="card">
                     <img src="${p.img}" onclick="TheMax.zoomImg('${p.id}')" loading="lazy" style="cursor:zoom-in;">
                     <div class="p-info" style="padding:12px;">
                         <h3 style="font-size:16px; margin-bottom:5px; height:40px; overflow:hidden;">${p.name}</h3>
+                        
+                        ${p.colors && p.colors.length > 0 ? `
+                        <div style="display:flex; gap:6px; margin-bottom:10px;">
+                            ${p.colors.map(c => `<span style="width:16px; height:16px; border-radius:50%; background:${c}; border:1px solid rgba(255,255,255,0.2); box-shadow:0 2px 4px rgba(0,0,0,0.2);"></span>`).join('')}
+                        </div>` : ''}
+
                         <div class="price-row" style="margin-bottom:8px;">
                             <span style="color:var(--primary); font-weight:700; font-size:19px;">৳${p.price}</span>
                             ${p.oldPrice ? `<span style="text-decoration:line-through; color:#888; margin-left:8px; font-size:13px;">৳${p.oldPrice}</span>` : ''}
@@ -374,7 +380,6 @@ const TheMax = (() => {
             }
         });
 
-        // ড্রপডাউন মেনু আপডেট
         const nav = document.getElementById('navDropdown');
         if(nav) {
             nav.innerHTML = `
@@ -387,20 +392,21 @@ const TheMax = (() => {
         TheMax.updateStaticTexts();
     },
 
-    // মাস্টার ট্রান্সলেশন ডিকশনারি
     t: (key) => {
         const lang = document.documentElement.getAttribute('lang') || 'bn';
         const dictionary = {
             bn: {
                 orderNow: "অর্ডার দিন", adminPanel: "অ্যাডমিন প্যানেল", langBtn: "ভাষা পরিবর্তন (English)", 
                 themeBtn: "থিম পরিবর্তন", refresh: "রিফ্রেশ করুন", tabAdd: "পণ্য যোগ", tabOrders: "অর্ডার তালিকা", 
-                tabManage: "ম্যানেজ", inName: "পণ্যের নাম", inPrice: "মূল্য", inDesc: "বিবরণ",
+                tabManage: "ম্যানেজ", inName: "পণ্যের নাম", inPrice: "মূল্য", inDesc: "বিবরণ", 
+                inColors: "কালার কোড (যেমন: red, blue)",
                 custName: "আপনার নাম", custPhone: "ফোন নম্বর", custAddr: "সম্পূর্ণ ঠিকানা", comments: "মন্তব্যসমূহ"
             },
             en: {
                 orderNow: "Order Now", adminPanel: "Admin Panel", langBtn: "Switch to Bangla", 
                 themeBtn: "Change Theme", refresh: "Refresh", tabAdd: "Add Product", tabOrders: "Orders List", 
-                tabManage: "Manage", inName: "Product Name", inPrice: "Price", inDesc: "Description",
+                tabManage: "Manage", inName: "Product Name", inPrice: "Price", inDesc: "Description", 
+                inColors: "Color codes (e.g., red, blue)",
                 custName: "Your Name", custPhone: "Phone Number", custAddr: "Full Address", comments: "Comments"
             }
         };
@@ -413,12 +419,15 @@ const TheMax = (() => {
         const bAdd = document.getElementById('btnTabAdd'), bOrd = document.getElementById('btnTabOrders'), bMan = document.getElementById('btnTabManage');
         if(bAdd) bAdd.innerText = T('tabAdd'); if(bOrd) bOrd.innerText = T('tabOrders'); if(bMan) bMan.innerText = T('tabManage');
 
-        // ইনপুট প্লেসহোল্ডার আপডেট
-        const iN = document.getElementById('inName'), iP = document.getElementById('inPrice'), iD = document.getElementById('inDesc');
-        if(iN) iN.placeholder = T('inName'); if(iP) iP.placeholder = T('inPrice'); if(iD) iD.placeholder = T('inDesc');
-
-        const cN = document.getElementById('cN'), cP = document.getElementById('cP'), cA = document.getElementById('cA');
-        if(cN) cN.placeholder = T('custName'); if(cP) cP.placeholder = T('custPhone'); if(cA) cA.placeholder = T('custAddr');
+        // ইনপুট প্লেসহোল্ডারগুলো ডাইনামিক করা
+        const inputs = {
+            'inName': 'inName', 'inPrice': 'inPrice', 'inDesc': 'inDesc', 'inColors': 'inColors',
+            'cN': 'custName', 'cP': 'custPhone', 'cA': 'custAddr'
+        };
+        for (let id in inputs) {
+            let el = document.getElementById(id);
+            if(el) el.placeholder = T(inputs[id]);
+        }
     },
 
     toggleLang: () => {
@@ -426,10 +435,7 @@ const TheMax = (() => {
         const next = current === 'bn' ? 'en' : 'bn';
         document.documentElement.setAttribute('lang', next);
         localStorage.setItem('siteLang', next);
-        
-        // এবার পুরোটা রি-রেন্ডার হবে, কোনো ক্যাশ থাকবে না
         TheMax.render(); 
-        
         if(document.getElementById('lightbox').style.display === 'flex' && state.selP) {
             TheMax.zoomImg(state.selP.id);
         }
@@ -451,6 +457,7 @@ const TheMax = (() => {
         if(!cBox) {
             cBox = document.createElement('div');
             cBox.id = "commentBox";
+            cBox.className = "comment-pane";
             cBox.style = "width:100%; max-width:550px; background:var(--card); padding:20px; border-radius:20px 20px 0 0; position:fixed; bottom:0; left:50%; transform:translateX(-50%); max-height:45vh; overflow-y:auto; border-top:3px solid var(--primary); z-index:30001;";
             lb.appendChild(cBox);
         }
@@ -462,6 +469,7 @@ const TheMax = (() => {
                 <button onclick="TheMax.addComment('${product.id}')" style="background:var(--primary); color:white; border:none; padding:6px 15px; border-radius:8px; font-size:12px; cursor:pointer;">${document.documentElement.getAttribute('lang')==='en'?'Add Comment':'মন্তব্য দিন'}</button>
             </div>
             <p style="font-size:13px; color:#ccc; margin-bottom:15px;">${product.desc || ''}</p>
+            ${product.colors ? `<div style="display:flex; gap:8px; margin-bottom:15px;">${product.colors.map(c => `<span style="width:22px; height:22px; border-radius:50%; background:${c}; border:2px solid #fff;"></span>`).join('')}</div>` : ''}
             ${(product.allComments || []).map(c => `<div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; margin-bottom:10px; font-size:13px; border-left:4px solid var(--primary);">${c}</div>`).join('') || ''}`;
         
         lb.style.display = 'flex';
@@ -501,9 +509,18 @@ const TheMax = (() => {
     toggleModal: (id, show) => {
         if(id === 'adminModal' && show) {
             const pass = prompt("Password:");
-            if(pass !== "shopnocowa@500nayem") return;
+            if(pass !== "shopnocowa@500nayem") return alert("Access Denied!");
             const drop = document.getElementById('navDropdown');
             if(drop) drop.style.display = 'none';
+
+            // অ্যাডমিন প্যানেল ফর্মে ইনপুট ফিল্ডটি বাস্তবে যোগ করার চূড়ান্ত লজিক
+            const panelAdd = document.getElementById('panelAdd');
+            if(panelAdd && !document.getElementById('inColors')) {
+                const colorHtml = `<input type="text" id="inColors" class="input-field" placeholder="Color codes (red, blue, green)">`;
+                // Description বক্সের ঠিক আগে এটি ইনসার্ট করা হচ্ছে
+                const descBox = document.getElementById('inDesc');
+                if(descBox) descBox.insertAdjacentHTML('beforebegin', colorHtml);
+            }
         }
         const modal = document.getElementById(id);
         if(modal) modal.classList.toggle('open', show);
@@ -511,20 +528,29 @@ const TheMax = (() => {
     },
 
     saveProduct: async () => {
+        const colorInput = document.getElementById('inColors').value;
+        const colorArray = colorInput ? colorInput.split(',').map(s => s.trim()) : [];
+        
         const d = {
             name: document.getElementById('inName').value,
             price: document.getElementById('inPrice').value,
             oldPrice: document.getElementById('inOld').value || "",
             img: document.getElementById('inImg').value,
+            colors: colorArray,
             cat: document.getElementById('inCat').value || 'General',
             video: document.getElementById('inVid').value || "",
             desc: document.getElementById('inDesc').value || "",
             likes: 0, comments: 0, allComments: [],
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
-        if(!d.name || !d.price || !d.img) return;
+        if(!d.name || !d.price || !d.img) return alert("Required fields missing!");
         await db.collection('products').add(d);
         TheMax.toggleModal('adminModal', false);
+        // ইনপুট রিসেট
+        ['inName','inPrice','inImg','inColors','inDesc'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.value = '';
+        });
     },
 
     openOrder: (id) => {
@@ -540,7 +566,7 @@ const TheMax = (() => {
 
     submitOrder: async () => {
         const n = document.getElementById('cN').value, p = document.getElementById('cP').value, a = document.getElementById('cA').value;
-        if(!n || !p || !a) return;
+        if(!n || !p || !a) return alert("Fill info!");
         await db.collection('orders').add({ pName: state.selP.name, customer: n, phone: p, address: a, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         window.open(`https://wa.me/8801788350024?text=নতুন অর্ডার: ${state.selP.name}%0Aনাম: ${n}%0Aঠিকানা: ${a}`);
         TheMax.toggleModal('orderModal', false);
@@ -572,7 +598,7 @@ const TheMax = (() => {
     loadManage: () => {
         const list = document.getElementById('productManageView');
         if(list) list.innerHTML = state.products.map(p => `
-            <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid var(--border); align-items:center;">
                 <span>${p.name}</span>
                 <i class="fas fa-trash" onclick="TheMax.del('products','${p.id}')" style="color:var(--red); cursor:pointer;"></i>
             </div>`).join('');
@@ -584,7 +610,6 @@ const TheMax = (() => {
 };
 })();
 
-// স্টার্টআপ ল্যাঙ্গুয়েজ সেট
 (function() {
     const s = localStorage.getItem('siteLang') || 'bn';
     document.documentElement.setAttribute('lang', s);
