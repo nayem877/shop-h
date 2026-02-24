@@ -341,191 +341,256 @@ const TheMax = (() => {
             state.products.filter(p => (state.cat==='All'||p.cat===state.cat) && p.name.toLowerCase().includes(term)).forEach(p => {
                 pBox.innerHTML += `
                     <div class="card">
-                        <img src="${p.img}" onclick="TheMax.zoomImg('${p.img}')">
-                        <h4>${p.name}</h4>
-                        <div class="price-box">
-                            ${p.oldPrice ? `<span class="old-p">৳${p.oldPrice}</span>` : ''}
-                            <span class="new-p">৳${p.price}</span>
+                      <div class="card">
+                    <img src="${p.img}" onclick="TheMax.zoomImg('${p.id}')" loading="lazy" style="cursor:zoom-in;">
+                    <div class="p-info" style="padding:12px;">
+                        <h3 style="font-size:16px; margin-bottom:5px; height:40px; overflow:hidden;">${p.name}</h3>
+                        <div class="price-row" style="margin-bottom:8px;">
+                            <span style="color:var(--primary); font-weight:700; font-size:19px;">৳${p.price}</span>
+                            ${p.oldPrice ? `<span style="text-decoration:line-through; color:#888; margin-left:8px; font-size:13px;">৳${p.oldPrice}</span>` : ''}
                         </div>
-                        <div class="meta">
-                                 ">
-                            <span onclick="TheMax.toggleLike('${p.id}')" style="cursor:pointer">
-                                <i class="fas fa-heart" id="ic-l-${p.id}"></i> <small id="ln-${p.id}">${p.likes || 0}</small>
+                        <p style="font-size:12px; color:#aaa; margin-bottom:10px; line-height:1.4; height:34px; overflow:hidden;">${p.desc || ''}</p>
+                        
+                        <div class="meta" style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px; color:#888;">
+                            <span onclick="TheMax.like('${p.id}')" style="cursor:pointer">
+                                <i class="fas fa-heart" id="ic-l-${p.id}" style="${localStorage.getItem('L_'+p.id)?'color:var(--red)':''}"></i> <small id="ln-${p.id}">${p.likes || 0}</small>
                             </span>
-                            <span onclick="TheMax.addComment('${p.id}')" style="cursor:pointer">
-                                <i class="fas fa-comment"></i> <small id="cn-${p.id}">${p.comments || 0}</small>
+                            <span onclick="TheMax.zoomImg('${p.id}')" style="cursor:pointer">
+                                <i class="fas fa-comment"></i> <small>${p.comments || 0}</small>
                             </span>
                         </div>
-                        <div style="margin-bottom:10px; display:flex; gap:5px; height:20px;">
-                            ${p.colors ? p.colors.split(',').map(c => `<div style="width:16px; height:16px; border-radius:50%; background:${c.trim()}; border:1px solid var(--border);"></div>`).join('') : ''}
-                        </div>
-                        <button class="order-btn" onclick="TheMax.openOrder('${p.id}')">${state.lang==='bn'?'অর্ডার দিন':'Order Now'}</button>
+                        <button class="order-btn" onclick="TheMax.openOrder('${p.id}')">
+                            ${TheMax.t('orderNow')}
+                        </button>
                     </div>
-                `;
+                </div>`;
 
-                if(p.video) {
-                    vBox.innerHTML += `
-                        <div class="vid-card">
-                            <div class="iframe-wrap"><iframe src="https://www.youtube.com/embed/${p.video}" allowfullscreen></iframe></div>
-                            <div style="padding:15px; font-weight:600; font-size:14px;">${p.name}</div>
-                        </div>
-                    `;
-                }
-            });
-        },
-
-        toggleLike: async (id) => {
-            try {
-                const pRef = db.collection('products').doc(id);
-                const doc = await pRef.get();
-                const newLikes = (doc.data().likes || 0) + 1;
-                await pRef.update({ likes: newLikes });
-                document.getElementById(`ln-${id}`).innerText = newLikes;
-                msg("লাইক দেওয়া হয়েছে!");
-            } catch(e) { msg("লাইক দিতে সমস্যা হয়েছে!"); }
-        },
-
-        addComment: async (id) => {
-            let c = prompt("আপনার নাম ও মন্তব্য লিখুন (উদা: রহিম - দারুণ পণ্য):");
-            if(c) {
-                try {
-                    const pRef = db.collection('products').doc(id);
-                    const doc = await pRef.get();
-                    const currentComments = doc.data().allComments || [];
-                    currentComments.push(c);
-                    await pRef.update({ 
-                        allComments: currentComments,
-                        comments: currentComments.length 
-                    });
-                    document.getElementById(`cn-${id}`).innerText = currentComments.length;
-                    msg("মন্তব্য জমা হয়েছে!");
-                } catch(e) { msg("সমস্যা হয়েছে!"); }
+            if(p.video) {
+                vBox.innerHTML += `
+                    <div class="vid-card">
+                        <div class="iframe-wrap"><iframe src="https://www.youtube.com/embed/${p.video}" allowfullscreen></iframe></div>
+                        <div style="padding:15px; font-weight:600; font-size:14px;">${p.name}</div>
+                    </div>`;
             }
-        },
+        });
 
-        zoomImg: (src) => {
-            const product = state.products.find(p => p.img === src);
-            document.getElementById('zoomImg').src = src;
-            const commentBox = document.createElement('div');
-            commentBox.id = "commentDisplay";
-            commentBox.style = "padding:15px; color:white; background:rgba(0,0,0,0.8); max-height:150px; overflow-y:auto; font-size:12px;";
-            commentBox.innerHTML = "<b>মন্তব্যসমূহ:</b><br>" + (product.allComments ? product.allComments.join('<br>') : "কোন মন্তব্য নেই");
-            
-            const lb = document.getElementById('lightbox');
-            if(!document.getElementById('commentDisplay')) lb.appendChild(commentBox);
-            else document.getElementById('commentDisplay').innerHTML = commentBox.innerHTML;
-            
-            lb.style.display = 'flex';
-            setTimeout(() => lb.classList.add('show'), 10);
-        },
-        closeZoom: () => {
-            const lb = document.getElementById('lightbox');
-            lb.classList.remove('show');
-            setTimeout(() => lb.style.display = 'none', 300);
-        },
-
-        toggleModal: (id, show) => {
-            if(id === 'adminModal' && show) {
-                let pass = prompt("এডমিন পাসওয়ার্ড দিন:");
-                if(pass !== "1234") return alert("ভুল পাসওয়ার্ড!"); 
-            }
-            document.getElementById(id).classList.toggle('open', show);
-        },
-
-        saveProduct: async () => {
-            const data = {
-                name: document.getElementById('inName').value,
-                price: document.getElementById('inPrice').value,
-                oldPrice: document.getElementById('inOldPrice').value,
-                img: document.getElementById('inImg').value,
-                cat: document.getElementById('inCat').value || 'General',
-                video: document.getElementById('inVid').value,
-                colors: document.getElementById('inColors') ? document.getElementById('inColors').value : "",
-                desc: document.getElementById('inDesc').value,
-                likes: 0, comments: 0, allComments: [],
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-            if(!data.name || !data.price || !data.img) return msg("প্রয়োজনীয় তথ্য দিন!");
-            await db.collection('products').add(data);
-            msg("পণ্য সেভ হয়েছে!");
-            ['inName','inPrice','inOldPrice','inImg','inCat','inVid','inColors','inDesc'].forEach(i => {
-                let el = document.getElementById(i); if(el) el.value = "";
-            });
-        },
-
-        openOrder: (id) => {
-            state.selP = state.products.find(x => x.id === id);
-            document.getElementById('orderSummary').innerHTML = `
-                <img src="${state.selP.img}" style="width:60px; height:60px; border-radius:8px; float:left; margin-right:12px;">
-                <b>${state.selP.name}</b><br>মূল্য: ৳${state.selP.price}
+        // ড্রপডাউন মেনু আপডেট
+        const nav = document.getElementById('navDropdown');
+        if(nav) {
+            nav.innerHTML = `
+                <button class="menu-link" onclick="TheMax.toggleModal('adminModal', true)"><i class="fas fa-user-shield"></i> ${TheMax.t('adminPanel')}</button>
+                <button class="menu-link" onclick="TheMax.toggleLang()"><i class="fas fa-language"></i> ${TheMax.t('langBtn')}</button>
+                <button class="menu-link" onclick="TheMax.toggleTheme()"><i class="fas fa-adjust"></i> ${TheMax.t('themeBtn')}</button>
+                <button class="menu-link" onclick="location.reload()"><i class="fas fa-sync"></i> ${TheMax.t('refresh')}</button>
             `;
-            TheMax.toggleModal('orderModal', true);
-        },
-
-        submitOrder: async () => {
-            const n = document.getElementById('cN').value, p = document.getElementById('cP').value, a = document.getElementById('cA').value;
-            if(!n || !p || !a) return msg("তথ্য দিন!");
-            await db.collection('orders').add({ pName: state.selP.name, customer: n, phone: p, address: a, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-            msg("অর্ডার সফল!");
-            window.open(`https://wa.me/8801788350024?text=Order:${state.selP.name}`, '_blank');
-            TheMax.toggleModal('orderModal', false);
-        },
-
-        switchTab: (t) => {
-            ['Add', 'Orders', 'Manage'].forEach(s => {
-                document.getElementById('panel'+s).style.display = s === t ? 'block' : 'none';
-                document.getElementById('btnTab'+s).classList.toggle('active', s === t);
-            });
-            if(t==='Manage') TheMax.renderManage();
-            if(t==='Orders') TheMax.loadAdminData();
-        },
-
-        loadAdminData: () => {
-            db.collection('orders').orderBy('createdAt', 'desc').onSnapshot(snap => {
-                document.getElementById('orderListView').innerHTML = snap.docs.map(doc => {
-                    const o = doc.data();
-                    return `<div style="padding:15px; border-bottom:1px solid var(--border); font-size:13px;"><b>${o.pName}</b><br>${o.customer} (${o.phone})</div>`;
-                }).join('') || "অর্ডার নেই!";
-            });
-        },
-
-        renderManage: () => {
-            document.getElementById('productManageView').innerHTML = state.products.map(p => `
-                <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid var(--border); align-items:center;">
-                    <span style="font-size:14px;">${p.name}</span>
-                    <button onclick="TheMax.delProd('${p.id}')" style="background:none; border:none; color:var(--red); cursor:pointer;"><i class="fas fa-trash"></i></button>
-                </div>
-            `).join('');
-        },
-
-        delProd: async (id) => { 
-            if(confirm("পণ্যটি ডিলিট করতে চান?")) {
-                try {
-                    await db.collection('products').doc(id).delete();
-                    msg("পণ্য ডিলিট হয়েছে!");
-                    state.products = state.products.filter(item => item.id !== id);
-                    TheMax.renderManage();
-                    TheMax.render();
-                } catch(error) { 
-                    msg("ডিলিট করতে সমস্যা হয়েছে!"); 
-                    console.log(error);
-                }
-            }
         }
-    };
+        TheMax.updateStaticTexts();
+    },
+
+    // মাস্টার ট্রান্সলেশন ডিকশনারি
+    t: (key) => {
+        const lang = document.documentElement.getAttribute('lang') || 'bn';
+        const dictionary = {
+            bn: {
+                orderNow: "অর্ডার দিন", adminPanel: "অ্যাডমিন প্যানেল", langBtn: "ভাষা পরিবর্তন (English)", 
+                themeBtn: "থিম পরিবর্তন", refresh: "রিফ্রেশ করুন", tabAdd: "পণ্য যোগ", tabOrders: "অর্ডার তালিকা", 
+                tabManage: "ম্যানেজ", inName: "পণ্যের নাম", inPrice: "মূল্য", inDesc: "বিবরণ",
+                custName: "আপনার নাম", custPhone: "ফোন নম্বর", custAddr: "সম্পূর্ণ ঠিকানা", comments: "মন্তব্যসমূহ"
+            },
+            en: {
+                orderNow: "Order Now", adminPanel: "Admin Panel", langBtn: "Switch to Bangla", 
+                themeBtn: "Change Theme", refresh: "Refresh", tabAdd: "Add Product", tabOrders: "Orders List", 
+                tabManage: "Manage", inName: "Product Name", inPrice: "Price", inDesc: "Description",
+                custName: "Your Name", custPhone: "Phone Number", custAddr: "Full Address", comments: "Comments"
+            }
+        };
+        return dictionary[lang][key] || key;
+    },
+
+    updateStaticTexts: () => {
+        const T = TheMax.t;
+        // ট্যাব বাটন আপডেট
+        const bAdd = document.getElementById('btnTabAdd'), bOrd = document.getElementById('btnTabOrders'), bMan = document.getElementById('btnTabManage');
+        if(bAdd) bAdd.innerText = T('tabAdd'); if(bOrd) bOrd.innerText = T('tabOrders'); if(bMan) bMan.innerText = T('tabManage');
+
+        // ইনপুট প্লেসহোল্ডার আপডেট
+        const iN = document.getElementById('inName'), iP = document.getElementById('inPrice'), iD = document.getElementById('inDesc');
+        if(iN) iN.placeholder = T('inName'); if(iP) iP.placeholder = T('inPrice'); if(iD) iD.placeholder = T('inDesc');
+
+        const cN = document.getElementById('cN'), cP = document.getElementById('cP'), cA = document.getElementById('cA');
+        if(cN) cN.placeholder = T('custName'); if(cP) cP.placeholder = T('custPhone'); if(cA) cA.placeholder = T('custAddr');
+    },
+
+    toggleLang: () => {
+        const current = document.documentElement.getAttribute('lang') || 'bn';
+        const next = current === 'bn' ? 'en' : 'bn';
+        document.documentElement.setAttribute('lang', next);
+        localStorage.setItem('siteLang', next);
+        
+        // এবার পুরোটা রি-রেন্ডার হবে, কোনো ক্যাশ থাকবে না
+        TheMax.render(); 
+        
+        if(document.getElementById('lightbox').style.display === 'flex' && state.selP) {
+            TheMax.zoomImg(state.selP.id);
+        }
+    },
+
+    toggleTheme: () => {
+        const cur = document.documentElement.getAttribute('data-theme');
+        document.documentElement.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+    },
+
+    zoomImg: (id) => {
+        const product = state.products.find(p => p.id === id);
+        if(!product) return;
+        state.selP = product;
+        document.getElementById('zoomImg').src = product.img;
+        const lb = document.getElementById('lightbox'), T = TheMax.t;
+        
+        let cBox = document.getElementById('commentBox');
+        if(!cBox) {
+            cBox = document.createElement('div');
+            cBox.id = "commentBox";
+            cBox.style = "width:100%; max-width:550px; background:var(--card); padding:20px; border-radius:20px 20px 0 0; position:fixed; bottom:0; left:50%; transform:translateX(-50%); max-height:45vh; overflow-y:auto; border-top:3px solid var(--primary); z-index:30001;";
+            lb.appendChild(cBox);
+        }
+        cBox.onclick = (e) => e.stopPropagation();
+
+        cBox.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <b style="color:var(--primary); font-size:16px;">${T('comments')} (${product.comments || 0})</b>
+                <button onclick="TheMax.addComment('${product.id}')" style="background:var(--primary); color:white; border:none; padding:6px 15px; border-radius:8px; font-size:12px; cursor:pointer;">${document.documentElement.getAttribute('lang')==='en'?'Add Comment':'মন্তব্য দিন'}</button>
+            </div>
+            <p style="font-size:13px; color:#ccc; margin-bottom:15px;">${product.desc || ''}</p>
+            ${(product.allComments || []).map(c => `<div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; margin-bottom:10px; font-size:13px; border-left:4px solid var(--primary);">${c}</div>`).join('') || ''}`;
+        
+        lb.style.display = 'flex';
+        setTimeout(() => lb.classList.add('show'), 10);
+    },
+
+    addComment: async (id) => {
+        const isEn = document.documentElement.getAttribute('lang') === 'en';
+        const n = prompt(isEn ? "Name:" : "নাম:"), c = prompt(isEn ? "Comment:" : "মন্তব্য:");
+        if(!n || !c) return;
+        const pRef = db.collection('products').doc(id);
+        const doc = await pRef.get();
+        const cms = doc.data().allComments || [];
+        cms.push(`${n}: ${c}`);
+        await pRef.update({ allComments: cms, comments: cms.length });
+        TheMax.zoomImg(id);
+    },
+
+    like: async (id) => {
+        if(localStorage.getItem('L_'+id)) return;
+        const pRef = db.collection('products').doc(id);
+        const doc = await pRef.get();
+        await pRef.update({ likes: (doc.data().likes || 0) + 1 });
+        localStorage.setItem('L_'+id, '1');
+        TheMax.render();
+    },
+
+    closeZoom: () => {
+        const lb = document.getElementById('lightbox');
+        lb.classList.remove('show');
+        setTimeout(() => { 
+            lb.style.display = 'none'; 
+            if(document.getElementById('commentBox')) document.getElementById('commentBox').remove(); 
+        }, 300);
+    },
+
+    toggleModal: (id, show) => {
+        if(id === 'adminModal' && show) {
+            const pass = prompt("Password:");
+            if(pass !== "shopnocowa@500nayem") return;
+            const drop = document.getElementById('navDropdown');
+            if(drop) drop.style.display = 'none';
+        }
+        const modal = document.getElementById(id);
+        if(modal) modal.classList.toggle('open', show);
+        if(show) TheMax.updateStaticTexts();
+    },
+
+    saveProduct: async () => {
+        const d = {
+            name: document.getElementById('inName').value,
+            price: document.getElementById('inPrice').value,
+            oldPrice: document.getElementById('inOld').value || "",
+            img: document.getElementById('inImg').value,
+            cat: document.getElementById('inCat').value || 'General',
+            video: document.getElementById('inVid').value || "",
+            desc: document.getElementById('inDesc').value || "",
+            likes: 0, comments: 0, allComments: [],
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        if(!d.name || !d.price || !d.img) return;
+        await db.collection('products').add(d);
+        TheMax.toggleModal('adminModal', false);
+    },
+
+    openOrder: (id) => {
+        state.selP = state.products.find(x => x.id === id);
+        const T = TheMax.t;
+        document.getElementById('orderSummary').innerHTML = `
+            <div style="display:flex; gap:10px; align-items:center;">
+                <img src="${state.selP.img}" style="width:50px; border-radius:5px;">
+                <div><b>${state.selP.name}</b><br>${T('inPrice')}: ৳${state.selP.price}</div>
+            </div>`;
+        TheMax.toggleModal('orderModal', true);
+    },
+
+    submitOrder: async () => {
+        const n = document.getElementById('cN').value, p = document.getElementById('cP').value, a = document.getElementById('cA').value;
+        if(!n || !p || !a) return;
+        await db.collection('orders').add({ pName: state.selP.name, customer: n, phone: p, address: a, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        window.open(`https://wa.me/8801788350024?text=নতুন অর্ডার: ${state.selP.name}%0Aনাম: ${n}%0Aঠিকানা: ${a}`);
+        TheMax.toggleModal('orderModal', false);
+    },
+
+    switchTab: (t) => {
+        ['Add', 'Orders', 'Manage'].forEach(s => {
+            const p = document.getElementById('panel'+s), b = document.getElementById('btnTab'+s);
+            if(p) p.style.display = s === t ? 'block' : 'none';
+            if(b) b.classList.toggle('active', s === t);
+        });
+        if(t === 'Orders') TheMax.loadOrders();
+        if(t === 'Manage') TheMax.loadManage();
+    },
+
+    loadOrders: () => {
+        db.collection('orders').orderBy('createdAt', 'desc').onSnapshot(snap => {
+            const list = document.getElementById('orderListView');
+            if(list) list.innerHTML = snap.docs.map(doc => `
+                <div style="padding:15px; border:1px solid var(--border); border-radius:10px; margin-bottom:10px; position:relative;">
+                    <b>${doc.data().pName}</b><br>
+                    <span>${doc.data().customer} (${doc.data().phone})</span><br>
+                    <small>${doc.data().address}</small>
+                    <i class="fas fa-trash" onclick="TheMax.del('orders','${doc.id}')" style="position:absolute; right:15px; top:15px; color:var(--red); cursor:pointer;"></i>
+                </div>`).join('') || "অর্ডার নেই";
+        });
+    },
+
+    loadManage: () => {
+        const list = document.getElementById('productManageView');
+        if(list) list.innerHTML = state.products.map(p => `
+            <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid var(--border);">
+                <span>${p.name}</span>
+                <i class="fas fa-trash" onclick="TheMax.del('products','${p.id}')" style="color:var(--red); cursor:pointer;"></i>
+            </div>`).join('');
+    },
+
+    del: async (col, id) => {
+        if(confirm("Confirm Delete?")) await db.collection(col).doc(id).delete();
+    }
+};
 })();
 
-window.addEventListener("DOMContentLoaded", TheMax.init);
-setTimeout(() => { 
-    document.getElementById('adminPanelBtn').style.display = 'flex'; 
-    const catField = document.getElementById('inCat');
-    if(catField && !document.getElementById('inColors')) {
-        const colorIn = document.createElement('input');
-        colorIn.id = 'inColors'; colorIn.className = 'field';
-        colorIn.placeholder = 'রঙ (যেমন: red, blue, green)';
-        catField.parentNode.insertBefore(colorIn, catField.nextSibling);
-    }
-}, 2000);
+// স্টার্টআপ ল্যাঙ্গুয়েজ সেট
+(function() {
+    const s = localStorage.getItem('siteLang') || 'bn';
+    document.documentElement.setAttribute('lang', s);
+})();
+
+TheMax.init();
 </script>
 </body>
 </html>
