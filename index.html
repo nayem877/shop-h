@@ -341,7 +341,7 @@ const TheMax = (() => {
             state.products.filter(p => (state.cat==='All'||p.cat===state.cat) && p.name.toLowerCase().includes(term)).forEach(p => {
                 pBox.innerHTML += `
                     <div class="card">
-                                    <div class="card">
+                    <div class="card">
                     <img src="${p.img}" onclick="TheMax.zoomImg('${p.id}')" loading="lazy" style="cursor:zoom-in;">
                     <div class="p-info" style="padding:12px;">
                         <h3 style="font-size:16px; margin-bottom:5px; height:40px; overflow:hidden;">${p.name}</h3>
@@ -398,15 +398,15 @@ const TheMax = (() => {
             bn: {
                 orderNow: "অর্ডার দিন", adminPanel: "অ্যাডমিন প্যানেল", langBtn: "ভাষা পরিবর্তন (English)", 
                 themeBtn: "থিম পরিবর্তন", refresh: "রিফ্রেশ করুন", tabAdd: "পণ্য যোগ", tabOrders: "অর্ডার তালিকা", 
-                tabManage: "ম্যানেজ", inName: "পণ্যের নাম", inPrice: "মূল্য", inDesc: "বিবরণ", 
-                inColors: "কালার কোড (যেমন: red, blue)",
+                tabManage: "ম্যানেজ", inName: "পণ্যের নাম", inPrice: "মূল্য", inOld: "আগের মূল্য (ঐচ্ছিক)",
+                inDesc: "বিবরণ", inColors: "কালার কোড (যেমন: red, blue)",
                 custName: "আপনার নাম", custPhone: "ফোন নম্বর", custAddr: "সম্পূর্ণ ঠিকানা", comments: "মন্তব্যসমূহ"
             },
             en: {
                 orderNow: "Order Now", adminPanel: "Admin Panel", langBtn: "Switch to Bangla", 
                 themeBtn: "Change Theme", refresh: "Refresh", tabAdd: "Add Product", tabOrders: "Orders List", 
-                tabManage: "Manage", inName: "Product Name", inPrice: "Price", inDesc: "Description", 
-                inColors: "Color codes (e.g., red, blue)",
+                tabManage: "Manage", inName: "Product Name", inPrice: "Price", inOld: "Old Price (Optional)",
+                inDesc: "Description", inColors: "Color codes (e.g., red, blue)",
                 custName: "Your Name", custPhone: "Phone Number", custAddr: "Full Address", comments: "Comments"
             }
         };
@@ -415,13 +415,11 @@ const TheMax = (() => {
 
     updateStaticTexts: () => {
         const T = TheMax.t;
-        // ট্যাব বাটন আপডেট
         const bAdd = document.getElementById('btnTabAdd'), bOrd = document.getElementById('btnTabOrders'), bMan = document.getElementById('btnTabManage');
         if(bAdd) bAdd.innerText = T('tabAdd'); if(bOrd) bOrd.innerText = T('tabOrders'); if(bMan) bMan.innerText = T('tabManage');
 
-        // ইনপুট প্লেসহোল্ডারগুলো ডাইনামিক করা
         const inputs = {
-            'inName': 'inName', 'inPrice': 'inPrice', 'inDesc': 'inDesc', 'inColors': 'inColors',
+            'inName': 'inName', 'inPrice': 'inPrice', 'inOld': 'inOld', 'inDesc': 'inDesc', 'inColors': 'inColors',
             'cN': 'custName', 'cP': 'custPhone', 'cA': 'custAddr'
         };
         for (let id in inputs) {
@@ -457,7 +455,6 @@ const TheMax = (() => {
         if(!cBox) {
             cBox = document.createElement('div');
             cBox.id = "commentBox";
-            cBox.className = "comment-pane";
             cBox.style = "width:100%; max-width:550px; background:var(--card); padding:20px; border-radius:20px 20px 0 0; position:fixed; bottom:0; left:50%; transform:translateX(-50%); max-height:45vh; overflow-y:auto; border-top:3px solid var(--primary); z-index:30001;";
             lb.appendChild(cBox);
         }
@@ -469,7 +466,7 @@ const TheMax = (() => {
                 <button onclick="TheMax.addComment('${product.id}')" style="background:var(--primary); color:white; border:none; padding:6px 15px; border-radius:8px; font-size:12px; cursor:pointer;">${document.documentElement.getAttribute('lang')==='en'?'Add Comment':'মন্তব্য দিন'}</button>
             </div>
             <p style="font-size:13px; color:#ccc; margin-bottom:15px;">${product.desc || ''}</p>
-            ${product.colors ? `<div style="display:flex; gap:8px; margin-bottom:15px;">${product.colors.map(c => `<span style="width:22px; height:22px; border-radius:50%; background:${c}; border:2px solid #fff;"></span>`).join('')}</div>` : ''}
+            ${product.colors && product.colors.length > 0 ? `<div style="display:flex; gap:8px; margin-bottom:15px;">${product.colors.map(c => `<span style="width:22px; height:22px; border-radius:50%; background:${c}; border:2px solid #fff;"></span>`).join('')}</div>` : ''}
             ${(product.allComments || []).map(c => `<div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; margin-bottom:10px; font-size:13px; border-left:4px solid var(--primary);">${c}</div>`).join('') || ''}`;
         
         lb.style.display = 'flex';
@@ -509,16 +506,16 @@ const TheMax = (() => {
     toggleModal: (id, show) => {
         if(id === 'adminModal' && show) {
             const pass = prompt("Password:");
-            if(pass !== "shopnocowa@500nayem") return alert("Access Denied!");
+            if(pass !== "shopnocowa@500nayem") return;
             const drop = document.getElementById('navDropdown');
             if(drop) drop.style.display = 'none';
 
-            // অ্যাডমিন প্যানেল ফর্মে ইনপুট ফিল্ডটি বাস্তবে যোগ করার চূড়ান্ত লজিক
+            // ইনপুট বক্সগুলো সঠিকভাবে ফর্মে বসানো হচ্ছে
             const panelAdd = document.getElementById('panelAdd');
             if(panelAdd && !document.getElementById('inColors')) {
-                const colorHtml = `<input type="text" id="inColors" class="input-field" placeholder="Color codes (red, blue, green)">`;
-                // Description বক্সের ঠিক আগে এটি ইনসার্ট করা হচ্ছে
                 const descBox = document.getElementById('inDesc');
+                // কালার ইনপুট বক্স
+                const colorHtml = `<input type="text" id="inColors" class="input-field" style="margin-bottom:12px;">`;
                 if(descBox) descBox.insertAdjacentHTML('beforebegin', colorHtml);
             }
         }
@@ -528,29 +525,50 @@ const TheMax = (() => {
     },
 
     saveProduct: async () => {
-        const colorInput = document.getElementById('inColors').value;
-        const colorArray = colorInput ? colorInput.split(',').map(s => s.trim()) : [];
-        
-        const d = {
-            name: document.getElementById('inName').value,
-            price: document.getElementById('inPrice').value,
-            oldPrice: document.getElementById('inOld').value || "",
-            img: document.getElementById('inImg').value,
-            colors: colorArray,
-            cat: document.getElementById('inCat').value || 'General',
-            video: document.getElementById('inVid').value || "",
-            desc: document.getElementById('inDesc').value || "",
-            likes: 0, comments: 0, allComments: [],
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        if(!d.name || !d.price || !d.img) return alert("Required fields missing!");
-        await db.collection('products').add(d);
-        TheMax.toggleModal('adminModal', false);
-        // ইনপুট রিসেট
-        ['inName','inPrice','inImg','inColors','inDesc'].forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.value = '';
-        });
+        try {
+            // প্রতিটি এলিমেন্ট আছে কি না তা চেক করে ভ্যালু নেওয়া
+            const elN = document.getElementById('inName'),
+                  elP = document.getElementById('inPrice'),
+                  elO = document.getElementById('inOld'),
+                  elI = document.getElementById('inImg'),
+                  elC = document.getElementById('inColors'),
+                  elCat = document.getElementById('inCat'),
+                  elV = document.getElementById('inVid'),
+                  elD = document.getElementById('inDesc');
+
+            if(!elN || !elP || !elI) {
+                alert("প্রয়োজনীয় ইনপুট বক্স খুঁজে পাওয়া যাচ্ছে না!");
+                return;
+            }
+
+            const name = elN.value, price = elP.value, img = elI.value;
+            if(!name || !price || !img) {
+                alert("নাম, মূল্য এবং ছবি অবশ্যই দিতে হবে!");
+                return;
+            }
+
+            const colors = elC ? elC.value.split(',').map(s => s.trim()).filter(s => s !== "") : [];
+            
+            const data = {
+                name: name,
+                price: price,
+                oldPrice: elO ? elO.value : "",
+                img: img,
+                colors: colors,
+                cat: elCat ? elCat.value : 'General',
+                video: elV ? elV.value : "",
+                desc: elD ? elD.value : "",
+                likes: 0, comments: 0, allComments: [],
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            await db.collection('products').add(data);
+            alert("পণ্য সফলভাবে সেভ হয়েছে!");
+            TheMax.toggleModal('adminModal', false);
+            TheMax.render();
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
     },
 
     openOrder: (id) => {
@@ -566,7 +584,7 @@ const TheMax = (() => {
 
     submitOrder: async () => {
         const n = document.getElementById('cN').value, p = document.getElementById('cP').value, a = document.getElementById('cA').value;
-        if(!n || !p || !a) return alert("Fill info!");
+        if(!n || !p || !a) return alert("সব তথ্য দিন!");
         await db.collection('orders').add({ pName: state.selP.name, customer: n, phone: p, address: a, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         window.open(`https://wa.me/8801788350024?text=নতুন অর্ডার: ${state.selP.name}%0Aনাম: ${n}%0Aঠিকানা: ${a}`);
         TheMax.toggleModal('orderModal', false);
