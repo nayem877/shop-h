@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Must Smart Ultimate Pro Max</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --bg: #020617; --container: #0f172a; --text: #ffffff; --btn: #1e293b; --accent: #38bdf8; --action: #f43f5e; --success: #10b981; }
+        .theme-green { --bg: #052e16; --container: #064e3b; --accent: #10b981; }
+        .theme-purple { --bg: #2e1065; --container: #4c1d95; --accent: #a855f7; }
+        .theme-blue { --bg: #0f172a; --container: #1e3a8a; --accent: #3b82f6; }
+        .light-mode { --bg: #f1f5f9; --container: #ffffff; --text: #0f172a; --btn: #e2e8f0; --accent: #2563eb; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        body { background-color: var(--bg); color: var(--text); height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+
+        /* ১. স্প্ল্যাশ স্ক্রিন (Splash Screen) */
+        #splash-screen { position: fixed; inset: 0; background: #020617; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; text-align: center; }
+        .splash-content h1 { color: #38bdf8; font-size: 30px; margin-bottom: 10px; font-weight: 800; animation: fadeIn 1.5s ease-in-out; letter-spacing: 1px; }
+        .splash-content p { color: #94a3b8; font-size: 14px; letter-spacing: 4px; text-transform: uppercase; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ২. মেইন অ্যাপ লেআউট */
+        .calculator { width: 100%; height: 100%; display: none; flex-direction: column; background: var(--bg); position: relative; }
+
+        .top-nav { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .icon-btn { width: 48px; height: 48px; border-radius: 50%; background: var(--btn); border: none; color: var(--text); cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        
+        .voice-btn { width: 60px; height: 60px; border: 3px solid var(--accent); color: var(--accent); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(56, 189, 248, 0); } 100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); } }
+        .voice-btn-active { background: var(--action) !important; color: white !important; border-color: white !important; box-shadow: 0 0 25px var(--action) !important; animation: voicePulse 0.5s infinite alternate !important; }
+        @keyframes voicePulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+
+        .display-section { flex: 1; padding: 25px; display: flex; flex-direction: column; justify-content: flex-end; text-align: right; }
+        #history-mini { font-size: 18px; color: var(--accent); min-height: 25px; opacity: 0.8; margin-bottom: 8px; font-weight: 500; }
+        #result { font-size: 55px; border: none; background: transparent; color: var(--text); width: 100%; text-align: right; outline: none; font-weight: 300; }
+
+        /* কারেন্সি সেকশন */
+        #currency-box { display: none; background: var(--container); margin: 0 15px 15px; padding: 20px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); animation: slideDown 0.4s ease; }
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .curr-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: center; justify-content: center; }
+        select { flex: 1; padding: 12px; border-radius: 12px; background: var(--btn); color: var(--text); border: 1px solid rgba(255,255,255,0.1); outline: none; font-size: 14px; font-weight: bold; }
+        #curr-val { font-size: 20px; color: var(--success); font-weight: 800; text-align: center; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+        /* কীপ্যাড */
+        .keypad-container { background: var(--container); border-radius: 40px 40px 0 0; padding: 20px 12px 40px; box-shadow: 0 -15px 50px rgba(0,0,0,0.6); }
+        .mode-switch { display: flex; gap: 10px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 5px; }
+        .toggle-btn { flex: 1; min-width: 100px; height: 45px; border-radius: 15px; border: none; background: var(--btn); color: var(--accent); font-weight: bold; cursor: pointer; font-size: 12px; letter-spacing: 1px; }
+        .toggle-btn.active { background: var(--accent); color: white; box-shadow: 0 5px 15px rgba(56, 189, 248, 0.4); }
+
+        .grid { display: grid; gap: 12px; }
+        .basic-grid { grid-template-columns: repeat(4, 1fr); }
+        .sci-grid { grid-template-columns: repeat(5, 1fr); display: none; }
+
+        button { height: 65px; border: none; border-radius: 20px; font-size: 24px; font-weight: 600; background: var(--btn); color: var(--text); cursor: pointer; position: relative; }
+        button:active { transform: scale(0.9); background: var(--accent); color: white; }
+        .btn-op { color: var(--accent); font-size: 28px; }
+        .btn-act { color: var(--action); }
+        .btn-eq { background: var(--accent); color: white; }
+        .btn-sci { font-size: 15px; color: var(--accent); background: var(--bg); border: 1px solid var(--btn); }
+
+        /* মেনু এবং মোডাল */
+        #side-menu { position: absolute; top: 75px; right: 20px; width: 250px; background: var(--container); border-radius: 25px; display: none; z-index: 500; padding: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.1); }
+        .menu-item { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; display: flex; align-items: center; gap: 15px; font-size: 15px; border-radius: 12px; }
+        .menu-item:hover { background: rgba(255,255,255,0.05); }
+
+        #history-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 25px; }
+        .modal-content { background: var(--container); width: 100%; max-width: 420px; max-height: 80%; border-radius: 30px; padding: 30px; overflow-y: auto; border: 1px solid var(--btn); }
+        
+        #toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 12px 30px; border-radius: 50px; display: none; z-index: 6000; font-weight: bold; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4); }
+    </style>
+</head>
+<body onclick="closeMenu()">
+
+    <div id="splash-screen">
+        <div class="splash-content">
+            <h1>Must Smart Ultimate</h1>
+            <p>Powered by AI Logic</p>
+            <div style="margin-top: 60px; font-weight: bold; color: #ffffff; opacity: 0.4; letter-spacing: 5px;">HYBRID</div>
+        </div>
+    </div>
+
+    <div id="toast">Copied!</div>
+
+    <div class="calculator" id="main-app">
+        <div class="top-nav">
+            <button class="icon-btn" onclick="toggleTheme()"><i class="fas fa-palette"></i></button>
+            <button id="voice-start" class="icon-btn voice-btn" onclick="startVoice(event)">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <div class="menu-container">
+                <button class="icon-btn" onclick="toggleMenu(event)"><i class="fas fa-bars-staggered"></i></button>
+                <div id="side-menu">
+                    <div style="display:flex; gap:8px; background:var(--bg); padding:6px; border-radius:12px; margin-bottom:12px;">
+                        <button class="toggle-btn active" style="min-width:auto; height:35px;" id="en-btn" onclick="changeLang('en')">ENGLISH</button>
+                        <button class="toggle-btn" style="min-width:auto; height:35px;" id="bn-btn" onclick="changeLang('bn')">বাংলা</button>
+                    </div>
+                    <div class="menu-item" onclick="showHistory()"><i class="fas fa-history"></i> <span class="ln" data-en="Calculation History" data-bn="হিস্টরি লিস্ট">Calculation History</span></div>
+                    <div class="menu-item" onclick="copyResult()"><i class="fas fa-copy"></i> <span class="ln" data-en="Copy Result" data-bn="ফলাফল কপি করুন">Copy Result</span></div>
+                    <div class="menu-item" onclick="setTheme('theme-blue')"><div style="width:18px; height:18px; border-radius:50%; background:#3b82f6; border:2px solid #fff;"></div> <span class="ln" data-en="Blue Ocean" data-bn="ব্লু থিম">Blue Ocean</span></div>
+                    <div class="menu-item" onclick="setTheme('theme-green')"><div style="width:18px; height:18px; border-radius:50%; background:#10b981; border:2px solid #fff;"></div> <span class="ln" data-en="Green Forest" data-bn="গ্রিন থিম">Green Forest</span></div>
+                    <div class="menu-item" onclick="shareApp()"><i class="fas fa-share-nodes"></i> <span class="ln" data-en="Share This App" data-bn="শেয়ার করুন">Share This App</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="display-section">
+            <div id="history-mini"></div>
+            <input type="text" id="result" readonly placeholder="0">
+        </div>
+
+        <div id="currency-box">
+            <div class="curr-row">
+                <select id="from-curr" onchange="convertCurr()">
+                    <option value="USD">USD ($)</option>
+                    <option value="BDT" selected>BDT (৳)</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="SAR">SAR (﷼)</option>
+                </select>
+                <i class="fas fa-exchange-alt" style="color:var(--accent)"></i>
+                <select id="to-curr" onchange="convertCurr()">
+                    <option value="USD" selected>USD ($)</option>
+                    <option value="BDT">BDT (৳)</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="SAR">SAR (﷼)</option>
+                </select>
+            </div>
+            <div id="curr-val">Result: 0.00</div>
+        </div>
+
+        <div class="keypad-container">
+            <div class="mode-switch">
+                <button onclick="switchMode('basic')" id="b-btn" class="toggle-btn active">BASIC MODE</button>
+                <button onclick="switchMode('sci')" id="s-btn" class="toggle-btn">SCIENTIFIC</button>
+                <button onclick="switchMode('curr')" id="c-btn" class="toggle-btn">CURRENCY</button>
+            </div>
+
+            <div class="grid basic-grid" id="basic-k">
+                <button onclick="clr()" class="btn-act">AC</button>
+                <button onclick="del()" class="btn-act">DEL</button>
+                <button onclick="ins('%')" class="btn-op">%</button>
+                <button onclick="ins('/')" class="btn-op">÷</button>
+                <button onclick="ins('7')">7</button><button onclick="ins('8')">8</button><button onclick="ins('9')">9</button>
+                <button onclick="ins('*')" class="btn-op">×</button>
+                <button onclick="ins('4')">4</button><button onclick="ins('5')">5</button><button onclick="ins('6')">6</button>
+                <button onclick="ins('-')" class="btn-op">−</button>
+                <button onclick="ins('1')">1</button><button onclick="ins('2')">2</button><button onclick="ins('3')">3</button>
+                <button onclick="ins('+')" class="btn-op">+</button>
+                <button onclick="ins('00')">00</button><button onclick="ins('0')">0</button>
+                <button onclick="ins('.')">.</button><button onclick="calculate()" class="btn-eq">=</button>
+            </div>
+
+            <div class="grid sci-grid" id="sci-k">
+                <button onclick="sciF('Math.sin')" class="btn-sci">sin</button>
+                <button onclick="sciF('Math.cos')" class="btn-sci">cos</button>
+                <button onclick="sciF('Math.tan')" class="btn-sci">tan</button>
+                <button onclick="ins('(')" class="btn-sci">(</button><button onclick="ins(')')" class="btn-sci">)</button>
+                <button onclick="sciF('Math.log10')" class="btn-sci">log</button>
+                <button onclick="sciF('Math.sqrt')" class="btn-sci">√</button>
+                <button onclick="ins('**')" class="btn-sci">xʸ</button>
+                <button onclick="ins('Math.PI')" class="btn-sci">π</button><button onclick="clr()" class="btn-act">AC</button>
+                <button onclick="ins('7')">7</button><button onclick="ins('8')">8</button><button onclick="ins('9')">9</button>
+                <button onclick="ins('*')" class="btn-op">×</button><button onclick="del()" class="btn-act">DEL</button>
+                <button onclick="ins('4')">4</button><button onclick="ins('5')">5</button><button onclick="ins('6')">6</button>
+                <button onclick="ins('/')" class="btn-op">÷</button><button onclick="ins('-')" class="btn-op">−</button>
+                <button onclick="ins('1')">1</button><button onclick="ins('2')">2</button><button onclick="ins('3')">3</button>
+                <button onclick="ins('+')" class="btn-op">+</button><button onclick="calculate()" class="btn-eq" style="grid-row: span 2; height: 142px;">=</button>
+                <button onclick="ins('0')">0</button><button onclick="ins('.')">.</button><button onclick="ins('Math.E')" class="btn-sci">e</button><button onclick="ins('00')">00</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="history-modal" onclick="this.style.display='none'">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3 style="margin-bottom:20px; color:var(--accent); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">Memory History</h3>
+            <div id="history-list"></div>
+            <button class="btn-act" style="width:100%; height:50px; margin-top:20px; font-weight:bold; border-radius:15px; background:var(--btn);" onclick="clearHistory()">DELETE ALL HISTORY</button>
+        </div>
+    </div>
+
+    <script>
+        // ১. ইনিশিয়ালাইজেশন
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                splash.style.transition = '0.8s';
+                splash.style.opacity = '0';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    document.getElementById('main-app').style.display = 'flex';
+                }, 800);
+            }, 3000);
+        });
+
+        let res = document.getElementById('result');
+        let hMini = document.getElementById('history-mini');
+        let currentLang = 'en';
+        let historyData = JSON.parse(localStorage.getItem('calcHistory')) || [];
+
+        const rates = { BDT: 1, USD: 118.20, INR: 1.42, SAR: 31.50 };
+
+        function changeLang(l) {
+            currentLang = l;
+            document.querySelectorAll('.ln').forEach(el => el.innerText = el.getAttribute(`data-${l}`));
+            document.getElementById('en-btn').classList.toggle('l-active', l==='en');
+            document.getElementById('bn-btn').classList.toggle('l-active', l==='bn');
+        }
+
+        function ins(v) { 
+            if(res.value==='0' || res.value==='Error') res.value=''; 
+            res.value += v; 
+            if(document.getElementById('currency-box').style.display==='block') convertCurr();
+        }
+
+        function clr() { 
+            res.value=''; hMini.innerText=''; 
+            document.getElementById('curr-val').innerText='Result: 0.00';
+        }
+
+        function del() { 
+            res.value=res.value.slice(0,-1); 
+            if(document.getElementById('currency-box').style.display==='block') convertCurr();
+        }
+
+        function calculate() {
+            try {
+                let expr = res.value.replace(/×/g,'*').replace(/÷/g,'/');
+                if(!expr) return;
+                let final = eval(expr);
+                hMini.innerText = res.value + " =";
+                res.value = Number.isInteger(final) ? final : final.toFixed(4);
+                historyData.push(hMini.innerText + " " + res.value);
+                if(historyData.length > 50) historyData.shift();
+                localStorage.setItem('calcHistory', JSON.stringify(historyData));
+            } catch { res.value = "Error"; }
+        }
+
+        function convertCurr() {
+            let amount = parseFloat(res.value) || 0;
+            let from = document.getElementById('from-curr').value;
+            let to = document.getElementById('to-curr').value;
+            let total = (amount * rates[from]) / rates[to];
+            document.getElementById('curr-val').innerText = `Result: ${total.toFixed(2)} ${to}`;
+        }
+
+        // ৩. সুপার ভয়েস রিকগনিশন (AI Optimization)
+        function startVoice(event) {
+            event.stopPropagation();
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRec) return alert("Your browser doesn't support Voice!");
+
+            const rec = new SpeechRec();
+            rec.lang = currentLang === 'en' ? 'en-US' : 'bn-BD';
+            
+            rec.onstart = () => {
+                document.getElementById('voice-start').classList.add('voice-btn-active');
+                hMini.innerText = currentLang === 'en' ? "Listening..." : "আমি শুনছি...";
+            };
+
+            rec.onend = () => {
+                document.getElementById('voice-start').classList.remove('voice-btn-active');
+            };
+
+            rec.onresult = (e) => {
+                let text = e.results[0][0].transcript.toLowerCase();
+                const bnNums = {'০':0,'১':1,'২':2,'৩':3,'৪':4,'৫':5,'৬':6,'৭':7,'৮':8,'৯':9};
+                let clean = text.replace(/[০-৯]/g, m => bnNums[m]);
+                
+                // ঐকিক নিয়ম ডিটেকশন
+                let nums = clean.match(/\d+(\.\d+)?/g);
+                if (nums && nums.length >= 3) {
+                    let v1=nums[0], v2=nums[1], v3=nums[2];
+                    res.value = ((v2 / v1) * v3).toFixed(2);
+                    hMini.innerText = "AI Unitary Result:";
+                } else {
+                    // সাধারণ ম্যাথ
+                    clean = clean.replace(/যোগ|plus/g,'+').replace(/বিয়োগ|বিয়োগ|minus/g,'-').replace(/গুণ|গুন|times|into/g,'*').replace(/ভাগ|divided/g,'/');
+                    let math = clean.replace(/[^0-9+\-*/.]/g, '');
+                    if(math) { res.value = math; calculate(); }
+                }
+            };
+            rec.start();
+        }
+
+        function switchMode(m) {
+            document.getElementById('basic-k').style.display = (m==='basic' || m==='curr')?'grid':'none';
+            document.getElementById('sci-k').style.display = m==='sci'?'grid':'none';
+            document.getElementById('currency-box').style.display = m==='curr'?'block':'none';
+            document.getElementById('b-btn').className = m==='basic'?'toggle-btn active':'toggle-btn';
+            document.getElementById('s-btn').className = m==='sci'?'toggle-btn active':'toggle-btn';
+            document.getElementById('c-btn').className = m==='curr'?'toggle-btn active':'toggle-btn';
+        }
+
+        function showHistory() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = historyData.length ? historyData.slice().reverse().map(item => `<div style="border-bottom:1px solid #334155; padding:12px 0; color:#fff;">${item}</div>`).join('') : "<p style='color:#94a3b8'>No history found.</p>";
+            document.getElementById('history-modal').style.display = 'flex';
+            closeMenu();
+        }
+
+        function clearHistory() {
+            if(confirm("Delete all memory?")) { historyData = []; localStorage.removeItem('calcHistory'); showHistory(); }
+        }
+
+        function copyResult() {
+            if(!res.value || res.value === '0') return showToast("Nothing to copy!");
+            navigator.clipboard.writeText(res.value);
+            showToast("Result Copied!");
+            closeMenu();
+        }
+
+        function toggleMenu(e) { e.stopPropagation(); let m = document.getElementById('side-menu'); m.style.display = m.style.display==='block'?'none':'block'; }
+        function closeMenu() { document.getElementById('side-menu').style.display='none'; }
+        function setTheme(t) { document.body.className = t; closeMenu(); }
+        function toggleTheme() { document.body.classList.toggle('light-mode'); }
+        function showToast(m) { let t=document.getElementById('toast'); t.innerText=m; t.style.display='block'; setTimeout(()=>t.style.display='none',2500); }
+        function shareApp() { if(navigator.share) navigator.share({title:'Smart Calc', text: `Check this result: ${res.value}`}); else copyResult(); }
+        function sciF(f) { try { let v = eval(res.value.replace(/×/g,'*').replace(/÷/g,'/')) || 0; res.value = eval(`${f}(${v})`); calculate(); } catch { res.value="Error"; } }
+    </script>
+</body>
+</html>
